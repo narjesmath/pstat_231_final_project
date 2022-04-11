@@ -372,31 +372,58 @@ pre code {
 
 <div id="dataset-overview" class="section level2">
 <h2>Dataset Overview</h2>
-<p>What does it include? Where and how will you be obtaining it? Include
-the link and source. About how many observations? How many predictors?
-What types of variables will you be working with? Is there any missing
-data? About how much? Do you have an idea for how to handle it?</p>
+<p>The FAOSTAT Temperature Change domain disseminates statistics of mean
+surface temperature change by country, with annual updates. The current
+dissemination covers the period 1961–2020. Statistics are available for
+monthly, seasonal and annual mean temperature anomalies, i.e.,
+temperature change with respect to a baseline climatology, corresponding
+to the period 1951–1980. The standard deviation of the temperature
+change of the baseline methodology is also available. Data are based on
+the publicly available GISTEMP data, the Global Surface Temperature
+Change data distributed by the National Aeronautics and Space
+Administration Goddard Institute for Space Studies (NASA-GISS).</p>
+<p>What does it include? Mean surface temperature change by country,
+with annual updates. The current dissemination covers the period
+1961–2020. Where and how will you be obtaining it? Include the link and
+source. <a href="https://www.fao.org/faostat/en/#data/ET" class="uri">https://www.fao.org/faostat/en/#data/ET</a> About how many
+observations? How many predictors? 181 observations, 20 predictors
+(assuming a 20years worth of mean Temperatures) What types of variables
+will you be working with? continuous&amp; categorical (mean
+temperatures, countries and time vars (sesonal vs. yearly)) Is there any
+missing data? About how much? Do you have an idea for how to handle it?
+Not sure yet</p>
 </div>
 <div id="overview-of-research-questions" class="section level2">
 <h2>Overview of research question(s)</h2>
 <p>What variable(s) are you interested in predicting? What question(s)
-are you interested in answering? Name your response/outcome variable(s)
-and briefly describe it/them. Will these questions be best answered with
-a classification or regression approach? Which predictors do you think
-will be especially useful? Is the goal of your model descriptive,
-predictive, inferential, or a combination? Explain.</p>
-</div>
-<div id="proposed-project-timeline" class="section level2">
-<h2>Proposed project timeline</h2>
+are you interested in answering? I’m interested in looking at the
+average Temperature changes in Africa, per country and sub-region. 1.
+How much did the mean temperature change across countries in Africa? 2.
+What are noticeable trends and patterns? 3. How much changes in average
+Temperatures in Africa for the next 10 years can we predict?</p>
+<p>Name your response/outcome variable(s) and briefly describe it/them.
+My outcome variable will be yearly average changes and/or seasonal
+changes Will these questions be best answered with a classification or
+regression approach? Regression approach Which predictors do you think
+will be especially useful? Yearly mean temperature changes Seasonal
+temperature changes per country Is the goal of your model descriptive,
+predictive, inferential, or a combination? Explain. I’m interested in a
+combination descriptive (what are current changes), what will
+temperature changes look like in 10 years (predictive) ## Proposed
+project timeline</p>
 <p>When do you plan on having your data set loaded, beginning your
 exploratory data analysis, etc? Provide a general timeline for the rest
-of the quarter.</p>
+of the quarter. Dataset is loaded in the folder
+<code>Environment_Temperature_change_E_Africa</code> 1. Clean the data
+2. Select the models to use for the data set 3. Start testing and
+answering the questions proposed above 4. choose a mode of visualization
+for the model (shiny dashboard)</p>
 </div>
 <div id="questions" class="section level2">
 <h2>Questions</h2>
 <p>Are there any problems or difficult aspects of the project you
-anticipate? Any specific questions you have for me/the instructional
-team?</p>
+anticipate? Not currently Any specific questions you have for me/the
+instructional team? Not currently</p>
 </div>
 
 
