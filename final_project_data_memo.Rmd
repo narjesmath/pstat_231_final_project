@@ -1,0 +1,34 @@
+---
+title: "Final Project Data Memo"
+author: "Narjes Mathlouthi"
+date: '2022-04-10'
+output: html_document
+---
+
+
+## Dataset Overview
+
+What does it include?
+Where and how will you be obtaining it? Include the link and source.
+About how many observations? How many predictors?
+What types of variables will you be working with?
+Is there any missing data? About how much? Do you have an idea for how to handle it?
+
+## Overview of research question(s)
+
+What variable(s) are you interested in predicting? What question(s) are you interested in answering?
+Name your response/outcome variable(s) and briefly describe it/them.
+Will these questions be best answered with a classification or regression approach?
+Which predictors do you think will be especially useful?
+Is the goal of your model descriptive, predictive, inferential, or a combination? Explain.
+
+## Proposed project timeline
+
+When do you plan on having your data set loaded, beginning your exploratory data analysis, etc?
+Provide a general timeline for the rest of the quarter.
+
+
+## Questions
+
+Are there any problems or difficult aspects of the project you anticipate?
+Any specific questions you have for me/the instructional team?
