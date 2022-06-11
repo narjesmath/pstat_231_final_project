@@ -92,6 +92,7 @@ with dates. The `tidymodels()` package is key to this analysis for
 setting up all the models for machine learning.
 
 Some of the Models used include : 
+
 PCA
 Lasso and Elastic-Net Regularized Generalized Linear
 Decision Tree
@@ -99,6 +100,9 @@ Random Forest
 Boosted Tree
 KNN
 Neural Network
+
+
+## Loading packages
 
 ```{r load packages, tidy = TRUE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
