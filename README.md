@@ -5,7 +5,7 @@ Machine learning class final project
 
 
 
-![Fig 1.Map of Apparent Fishing Effort](images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png){width="400"}
+![Fig 1.Map of Apparent Fishing Effort](<img src="images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png"){width="400"}
 
 
 
