@@ -1,4 +1,4 @@
-# Classification of Vessel Geartype in 2020 
+# Classification of Vessel Geartype 
 
 Machine learning class final project
 
@@ -17,8 +17,8 @@ Fig 1.Map of Apparent Fishing Effort <em> “Copyright [2022], Global Fishing Wa
 
 This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets .Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which ~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
 
-Using Global Fishing Watch vessel data from 2020, I use several machine learning classification models to predict geartype of fishing vessels.
-From the 16 available classes of geartype I choose the following predicting variables:
+Using Global Fishing Watch fishing effort vessel data, I use several machine learning classification models to predict geartype of fishing vessels.
+From the 16 available classes of geartype my outcome variable will be based on these five classes:
 
 "set_longlines", "set_gillnets", "tuna_purse_seines",	"fishing",			
 "other_purse_seines","	drifting_longlines"
@@ -28,6 +28,7 @@ From the 16 available classes of geartype I choose the following predicting vari
 
 <img src="images/3d.png" width="300">
 
+Fig2.Visual representation of three principal components from the vessel data
 
 1. PCA
 3. Lasso and Elastic-Net Regularized Generalized Linear 
