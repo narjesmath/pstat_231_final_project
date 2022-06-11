@@ -11,7 +11,7 @@ Machine learning class final project
 
 
 
-Fig 1.Map of Apparent Fishing Effort
+Fig 1.Map of Apparent Fishing Effort <em> “Copyright [2022], Global Fishing Watch, Inc., www.globalfishingwatch.org.” </em>
 
 ## Overview
 
