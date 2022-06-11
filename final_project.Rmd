@@ -552,7 +552,11 @@ tune_res_1 <- tune_grid(
 autoplot(tune_res_1)
 ```
 
+Smaller values of penalty, or “amount of regularization,” and smaller values of mixture, or “proportion of lasso penalty,” tend to result in higher ROC-AUC and accuracy values. 
+
+
 #### Model Prediction, fitting & Visualization
+
 
 ```{r en best}
 best_model <- select_best(tune_res_1, metric = "roc_auc")
@@ -570,20 +574,20 @@ predicted_data %>%
   autoplot(type = "heatmap")
 ```
 
+In the heat map, the correct classifications are always on the diagonal
+and misclassifications on the off-diagonals. The model correctly
+identified fishing geartype, for example. From the heat map, we can see
+that the model doesn't seem to be able to distinguish other_purse_seines well at
+all; it misclassifies other geartypes as fishing frequently.
+
+
+
 ```{r en pred data}
 predicted_data %>% roc_auc(vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)
 ```
 
-In the heat map, the correct classifications are always on the diagonal
-and misclassifications on the off-diagonals. The model correctly
-identified 18/30 Normal-type, for example. From the heat map, we can see
-that the model doesn't seem to be able to distinguish Water-type well at
-all; it misclassifies other types as Water frequently, especially Grass.
+roc_auc  in this model is around 72%.
 
-The model is worst at differentiating; here, the model is worst at
-identifying Grass- and Water-type, based on the ROC curves. They should
-also identify those it's best at; here that appears to be Psychic- and
-Normal-type.
 
 ### Decision Trees
 
@@ -655,7 +659,6 @@ arrange(desc((mean)))
 best_complexity <- select_best(tune_res_tr )
 ```
 
-The `roc_auc` of my best-performing pruned decision tree on the folds is
 
 #### Decision Tree Visualization
 
@@ -791,14 +794,14 @@ boost_tune_res <- tune_grid(
   metrics = metric_set(roc_auc) 
   )
 
-saveRDS(boost_tune_res,file = "boost_tune.RDS")
-boost_results <- readRDS("boost_tune.RDS")
+# saveRDS(boost_tune_res,file = "boost_tune.RDS")
+# boost_results <- readRDS("boost_tune.RDS")
 # autoplot(boost_results)
 
 autoplot(boost_tune_res) 
 ```
 
-ROC AUC peaks at around 400 trees and then slowly declines again.
+ROC AUC peaks 231 then slowly declines again.
 
 ```{r}
 boost_metrics <- collect_metrics(boost_tune_res) %>% 
@@ -807,7 +810,7 @@ arrange(desc((mean)))
 best_complexity_boost <- select_best(boost_tune_res)
 ```
 
-The `roc_auc` of your best-performing boosted tree model on the folds
+The `roc_auc` of your best-performing boosted tree model on the folds 0.81
 
 #### Decion Tree, Random Forest, & Boosting model predictions
 
@@ -819,23 +822,24 @@ joined_models
 
 The best model is the random forest model, with an AUC ROC of 0.628.
 
-#### Best-performing model
+#### Best-performing model on the testing set 
 
-Print the AUC value of your best-performing model on the testing set.
-Print the ROC curves. Finally, create and visualize a confusion matrix
-heat map.
+
 
 ```{r}
 rf_test_fit = augment(rf_fit, new_data = vessels_test) 
-roc_auc(rf_test_fit, truth = type_1, .pred_Bug, .pred_Fire, .pred_Grass, .pred_Normal, .pred_Water, .pred_Psychic) 
+roc_auc(rf_test_fit, truth = vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines) 
+```
+
+AUC value of the best-performing model on the testing set.
+
+
+```{r}
+autoplot(roc_curve(rf_test_fit, truth = vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)) 
 ```
 
 ```{r}
-autoplot(roc_curve(rf_test_fit, truth = type_1, .pred_Bug, .pred_Fire, .pred_Grass, .pred_Normal, .pred_Water, .pred_Psychic)) 
-```
-
-```{r}
-conf_mat(rf_test_fit, truth = type_1, estimate = .pred_class) %>% 
+conf_mat(rf_test_fit, truth = vessel_class_gfw, estimate = .pred_class) %>% 
   autoplot(type = "heatmap") + 
   theme(axis.text.x = element_text(angle = 90, hjust=1)) 
 ```
@@ -871,6 +875,9 @@ knn_res %>% collect_metrics(summarize = TRUE)
 
 ```
 
+
+The `roc_auc` of the best-performing knn here is 0.40
+
 #### Neural network
 
 ```{r neural network}
@@ -902,6 +909,11 @@ nnet_res <-
 ```
 
 ## Conclusion
+
+
+
+
+
 
 ## References
 
