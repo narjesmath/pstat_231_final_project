@@ -299,7 +299,7 @@ panel.grid = element_blank(), legend.key = NULL)+
     set_longlines, set_gillnets, squid_jigger, tuna_purse_seines,
     fixed_gear, pole_and_line.
 
-```{r, tidy = TRUE}
+```{r vessels df, tidy = TRUE}
 
 # Creating a vessels df and filtering for the geartype of choice
 
@@ -318,7 +318,7 @@ vessels_sub <- sample_n(vessels_df,10000) %>%
 # Let's look at the proportion of geartype within our subset
 vessels_sub %>% 
   count(vessel_class_gfw) %>% 
-mutate(prop = n/sum(n)) %>%
+  mutate(prop = n/sum(n)) %>%
   arrange(-(round(prop,2))) %>% 
   kable(caption = "Fishing Gear Class") %>% 
   column_spec( 1:3, width = "10em") %>% 
@@ -336,7 +336,7 @@ vessels_sub %>%
   theme_bw()+
   labs(x="") +
   theme(axis.ticks.y = element_line(size =1),
-panel.grid = element_blank(), legend.key = NULL)+
+  panel.grid = element_blank(), legend.key = NULL)+
   coord_flip()  
 
 ```
@@ -414,7 +414,7 @@ pca_3d <- pca3d(
 ## a bit more fancy:
   ## black background, white axes,
   ## centroids
-pca3d(
+pca2_3d <- pca3d(
   vessels_pca,
     fancy= TRUE, bg= "black", 
     axes.color= "white", new= TRUE) 
@@ -440,7 +440,6 @@ vessels_split <- initial_split(vessels_sub, prop = 0.8, strata = vessel_class_gf
 vessels_train <- training(vessels_split)
 vessels_test <- testing(vessels_split)
 # dim(vessels_train)
-
 ```
 
 In order to have a good training set, we set up prop equal to 80% and our training set has 29 variables with 7998 obs.
@@ -884,6 +883,9 @@ knn_res %>% collect_metrics(summarize = TRUE)
 # knn_results <- saveRDS(boost_tune_res,file = "boost_tune.rds")
 # knn_results <- readRDS("boost_results.rds")
 
+
+
+
 ```
 
 
@@ -892,31 +894,33 @@ The `roc_auc` of the best-performing knn here is 0.40
 #### Neural network
 
 ```{r neural network}
- # ?keras::install_keras()
-# install_keras(Tensorflow = "1.13.1",
-# restart_session = FALSE)
-library(keras)
+#  # ?keras::install_keras()
+# # install_keras(Tensorflow = "1.13.1",
+# # restart_session = FALSE)
+# library(keras)
+# library(tensorflow)
+# 
+# nnet_spec <-
+#   mlp() %>%
+#   set_mode("classification") %>% 
+#   set_engine("keras", verbose = 0) 
+# 
+# nnet_wflow <-
+#  workflow() %>%
+#  add_recipe(vessels_recipe) %>% 
+#  add_model(nnet_spec)
+# 
+# nnet_res <- 
+#   nnet_wflow %>% 
+#   fit_resamples(
+#     resamples = vessels_folds, 
+#     metrics = metric_set(
+#       recall, precision, f_meas, 
+#       accuracy, kap,
+#       roc_auc, sens, spec),
+#     control = control_resamples(save_pred = TRUE)
+#     ) 
 
-nnet_spec <-
-  mlp() %>%
-  set_mode("classification") %>% 
-  set_engine("keras", verbose = 0) 
-
-nnet_wflow <-
- workflow() %>%
- add_recipe(vessels_recipe) %>% 
- add_model(nnet_spec)
-
-nnet_res <- 
-  nnet_wflow %>% 
-  fit_resamples(
-    resamples = vessels_folds, 
-    metrics = metric_set(
-      recall, precision, f_meas, 
-      accuracy, kap,
-      roc_auc, sens, spec),
-    control = control_resamples(save_pred = TRUE)
-    ) 
 ```
 
 ## Conclusion
