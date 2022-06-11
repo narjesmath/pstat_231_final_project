@@ -14,7 +14,7 @@ output:
 
 This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets .Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which ~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
 
-![Fig 1.Map of Apparent Fishing Effort.](images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png){width="200"}
+![Fig 1.Map of Apparent Fishing Effort.](images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png){width="500"}
 
 
 
@@ -44,7 +44,7 @@ This MMSI number is usually unique to a single vessel and typically doesn’t ch
 
 ## Data Wrangling & Exploration
 
-In Data Understanding, you:
+In a snapshot, some of the steps for data exploration in this analysis include :
 
 * Import data
 * Clean data
@@ -61,7 +61,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 #### Load Packages 
 
-We will use several R packages to work with the data. The tidyverse package contains several helpful packages for data manipulation (dplyr, tidyr, readr) and plotting (ggplot2). The furrr package is useful for running operations in parallel, lubridate is great for working with dates, and the sf and raster packages are designed for working with vector and raster data, respectively, in R. There are also a few additional mapping packages that are helpful for plotting. If you do not already have these packages installed you can do so with the install.packages() function.
+We will use several R packages to work with the data. The tidyverse package contains several helpful packages for data manipulation (dplyr, tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working with dates. The `tidymodels()` package is key to this analysis for setting up all the models for machine learning.
 
 
 ```{r load packages, tidy = TRUE, message=FALSE, warning=FALSE}
@@ -87,7 +87,7 @@ library(lubridate) # for working with dates
 library(here) # for paths
 library(janitor) # for cleaning var names 
 library(formatR) #used for chunk tidy code formatting
-
+library(knitr)
 
 ### ML packages
 library(tidymodels)
@@ -100,7 +100,6 @@ library(kableExtra)
 library(readr)
 library(corrr)
 library(corrplot)
-library(discrim)
 library(klaR)
 library(tune)
 
@@ -137,45 +136,60 @@ Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are useful for p
 #### World polygons from the maps package
 
 ```{r}
-load("world.Rda")
+# load("world.Rda")
 ```
 
 #### Load EEZ polygons
 
 ```{r}
-load("eezs.Rda")
+# load("eezs.Rda")
 ```
 
 ## Loading the data
 
-```{r load data}
+```{r load data, tidy = TRUE}
 
 # load vessels yearly data
 load("vessels.Rda")
 # head(vessels)
 
-# mmsi 2020-09-13
-mmsi_2020 <- read_csv(here("data", "mmsi-daily-csvs-10-v2-2020", "2020-09-13.csv")) 
-
-# fleet 2020-09-13
-fleet_2020 <- read_csv(here("data", "fleet-daily-csvs-100-v2-2020", "2020-09-13.csv"))
-
 ```
 
 
+## Geartypes:
+
+The current version of the GFW vessel classification neural net classifies fishing vessels into sixteen categories.
+
+![Fig 2.Map of Apparent Fishing Effort.](images/rawai LongLine.jpeg){width="500"}
+
+Longline fishermen use lines that can extend for up to 50 miles, with thousands of baited hooks branching off from the main line. Unfortunately, the baited hooks attract a vast array of species that are not intentionally targeted, including diving birds, turtles, etc. If an animal becomes hooked, it is often seriously injured or dead by the time the gear is retrieved. Using more selective gear instead of longlines is proven to reduce bycatch and improve fishing efficiency.(oceana.org)
+
+Some classes of the outcome variable chosen for this analysis are described below :
+
+- `fishing`: a combination of vessels of unknown fishing gear
+- `drifting_longlines`: drifting longlines
+- `seiners`: vessels using seine nets, including potential purse seine vessels
+   targeting tuna and other species, as well as danish and other seines
+- `purse_seines`: purse seines, both pelagic and demersal
+- `tuna_purse_seines`: large purse seines primarily fishing for tuna.
+- `other_purse_seines`: purse seiners fishing for mackerel, anchovies, etc, often smaller and operating nearer the    coast than tuna purse seines.
+- `other_seines`: danish seines and other seiners not using purse seines.
+- `trawlers`: trawlers, all types
+- `pole_and_line`: vessel from which people fish with pole and line.
+- `trollers`: vessel that tows multiple fishing lines.
+- `fixed_gear`: a category that includes potential set longlines, set gillnets,  and pots and traps
+   
 
 
-## EDA
+## Exploratory Data Analysis
 
-```{r vessels eda}
+```{r vessels eda, tidy = TRUE}
 #To get a first impression of the data we take a look at the top 4 rows:
 # install.packages("gt")
 library(gt)
 
 #vessels data quick exploration
-
 vessels %>% 
-  # filter(flag_gfw %in% c("FJI"))
   slice_head(n = 4) %>% 
   gt() # print output using gt
 
@@ -225,7 +239,7 @@ panel.grid = element_blank(), legend.key = NULL)+
 
 
 
-```{r}
+```{r, tidy = TRUE}
 
 # # Specify new (lower) resolution in degrees for aggregating data
 # res <- 0.25
@@ -243,7 +257,7 @@ vessels_sub <- sample_n(vessels_df,10000) %>%
   imputeTS::na.replace(0) 
 ```
 
-```{r eda}
+```{r eda, tidy = TRUE}
 # Let's look at the proportion of geartype within our subset
 vessels_sub %>% 
   count(vessel_class_gfw) %>% 
@@ -268,149 +282,6 @@ panel.grid = element_blank(), legend.key = NULL)+
 
 
 
-## Adjusting data resolution
-
-We now have a data frame (effort_df) containing all the fishing effort data for 2016 that we can summarize in various ways. The native data are at a resolution of 0.01 degrees. This resolution is great for fine scale analyses, however, we’re interested in making global maps and 0.01 degrees is a much finer resolution than necessary. So, before doing any summaries, let’s adjust the resolution of the data by calculating new values for lat_bin and lon_bin at our desired resolution of 0.25 degrees.
-
-# We can now aggregate the data to generate results gridded at 0.25 degrees instead of 0.01.
-```{r}
-# effort_df <- fleet_df %>% 
-#   group_by(date, year, month, lon_bin, lat_bin, flag, geartype) %>% 
-#   summarize(
-#     # vessel_hours = sum(vessel_hours, na.rm = T),
-#             fishing_hours = sum(fishing_hours, na.rm = T),
-#             mmsi_present  = sum(mmsi_present, na.rm = T))
-# 
-# # Aggregate data across all fleets and geartypes
-# effort_all <- effort_df %>% 
-#   group_by(lon_bin,lat_bin) %>% 
-#   summarize(fishing_hours = sum(fishing_hours, na.rm = T),
-#             log_fishing_hours = log10(sum(fishing_hours, na.rm = T))) %>% 
-#   ungroup() %>% 
-#   mutate(log_fishing_hours = ifelse(log_fishing_hours <= 1, 1, log_fishing_hours),
-#          log_fishing_hours = ifelse(log_fishing_hours >= 5, 5, log_fishing_hours)) %>% 
-#   filter(fishing_hours >= 24)
-
-  
-```
-
-
-
-```{r}
-# Linear green color palette function
-# effort_pal <- colorRampPalette(c('#0C276C', '#3B9088', '#EEFF00', '#ffffff'), 
-#                                interpolate = 'linear')
-# library(ggthemes)
-# 
-# # Map fishing effort
-# p1 <- effort_all %>%
-#   ggplot() +
-#   geom_sf(data = world_shp, 
-#           fill = '#374a6d', 
-#           color = '#0A1738',
-#           size = 0.1) +
-#   geom_sf(data = eezs_shp,
-#           color = '#374a6d',
-#           alpha = 0.2,
-#           fill = NA,
-#           size = 0.1) +
-#   geom_raster(aes(x = lon_bin, y = lat_bin, fill = log_fishing_hours)) +
-#   scale_fill_gradientn(
-#         "Fishing Hours",
-#         na.value = NA,
-#         limits = c(1, 5),
-#         colours = effort_pal(5), # Linear Green
-#         labels = c("10", "100", "1,000", "10,000", "100,000+"),
-#         values = scales::rescale(c(0, 1))) +
-#   labs(fill  = 'Fishing hours (log scale)',
-#        title = 'Global fishing effort in 2020-09-13',
-#        x = "Longitude",
-#        y = "latitude") +
-#   guides(fill = guide_colourbar(barwidth = 3)) 
-# 
-# #Add theme
-
-```
-
-
-## Fishing effort by gear type
-
-```{r}
-# Aggregate data by geartype across all fleets 
-# effort_gear <- effort_df %>% 
-#   group_by(lon_bin,lat_bin, geartype) %>% 
-#   summarize(fishing_hours = sum(fishing_hours, na.rm = T),
-#             log_fishing_hours = log10(sum(fishing_hours, na.rm = T))) %>% 
-#   ungroup() %>% 
-#   mutate(log_fishing_hours = ifelse(log_fishing_hours <= 1, 1, log_fishing_hours),
-#          log_fishing_hours = ifelse(log_fishing_hours >= 5, 5, log_fishing_hours)) %>% 
-#   filter(fishing_hours >= 24)
-```
-
-
-
-
-
-## Fishing effort by flag state
-
-We can examine the fishing effort of a specific flag state in the same manner. Let’s look at .
-
-```{r}
-# Aggregate data by geartype across all fleets 
-# effort_flag <- effort_df %>%
-#   filter(flag %in% c('TWN')) %>% 
-#   group_by(lon_bin, lat_bin, flag) %>% 
-#   summarize(fishing_hours = sum(fishing_hours, na.rm = T),
-#             log_fishing_hours = log10(sum(fishing_hours, na.rm = T))) %>% 
-#   ungroup() %>% 
-#   mutate(log_fishing_hours = ifelse(log_fishing_hours <= 1, 1, log_fishing_hours),
-#          log_fishing_hours = ifelse(log_fishing_hours >= 5, 5, log_fishing_hours)) %>% 
-#   filter(fishing_hours >= 24)
-```
-
-## Fishing effort within a region
-
-Often we are interested in examining fishing effort within a specific region, such as a marine protected area or a country’s EEZ. While our public data includes information on flag state, this is not the same as fishing location – vessels can fish outside the waters of their flag state. Thus, we need to use the spatial location of the effort, not the flag state. To accomplish this, we first need a polygon for the region of interest. In some cases, this polygon could be a simple bounding box.
-
-For this example, we’ll examine fishing effort within the Peruvian EEZ in 2016. First, let’s extract Peru’s EEZ from our eezs object. We’ll also calculate a bounding box around Peru’s EEZ to constrain our maps.
-
-
-
-
-```{r}
-# Select Peru EEZ
-# per <- eezs %>% 
-#   filter(ISO_Ter1 == 'PER' & Pol_type == '200NM') %>% 
-#   dplyr::select(ISO_Ter1, geometry)
-# 
-# # Get bounding box for Peru EEZ
-# per_bbox <- sf::st_bbox(per)
-```
-
-Next, we need to convert our effort_all dataframe to an sfobject, specifying which variables represent the coordinates, in order to perform spatial operations between our fishing effort data and our EEZ. Doing this requires defining a coordinate reference system (crs) for the data, and this crs must match the crs of the per polygon. In this case, both data are in decimal degrees using the WGS 1984 map datum and we can just set the crs of the effort data equal to the crs of the Peru shapefile.
-
-```{r}
-# Convert effort data frame to sf object
-# effort_all_sf <- st_as_sf(effort_all,
-#                        coords = c("lon_bin", "lat_bin"),
-#                        crs = st_crs(per))
-```
-
-
-Next, we’ll use a spatial join between the effort_all_sf and per dataframes. The join adds the ISO_Ter1 variable to the effort_all_sf dataframe, allowing us to then filter the data to only include points within the Peruvian EEZ (ISO_Ter1 == 'PER'). Lastly, for plotting reasons, we remove the geometry column that was added when we converted the data to an sf object.
-
-```{r}
-# Filter effort data to within the Peruvian EEZ
-# per_effort <- effort_all_sf %>% 
-#   sf::st_join(per, join = st_intersects) %>% # use a spatial join
-#   filter(ISO_Ter1 == 'PER') %>% # filter only datapoints within Peruvian EEZ
-#   bind_cols(st_coordinates(.) %>% as.data.frame()) %>%
-#   rename(lat_bin = Y,
-#          lon_bin = X) %>%
-#   st_set_geometry(NULL)
-```
-
-
 
 ## Machine Learning Models
 
@@ -425,7 +296,7 @@ It's important to specify `scale = TRUE` so that each of the variables in the da
 Also note that eigenvectors in R point in the *negative direction* by default, so we’ll multiply by *-1* to reverse the signs.
 
 
-```{r pca}
+```{r pca, tidy = TRUE, message=FALSE, warning=FALSE}
 
 # install.packages("imputeTS")
 
@@ -487,7 +358,7 @@ pca3d(
 Error in prcomp.default(.) : 
 cannot rescale a constant/zero column to unit variance
 
-```{r data split}
+```{r data split, tidy = TRUE}
 
 set.seed(3435)
 
@@ -504,7 +375,7 @@ dim(vessels_train)
 
  a. Corrplot
 
-```{r}
+```{r corrplot, tidy = TRUE}
 vessels_train %>% 
   select_if(is.numeric ) %>% 
   dplyr::select(- vessel_class_inferred_score) %>% 
@@ -515,21 +386,21 @@ vessels_train %>%
 
  b. Barplot
 
-```{r trainviz}
+```{r barplot, tidy = TRUE}
 vessels_train %>% 
   ggplot(aes(x = vessel_class_gfw)) +
   geom_bar(aes(fill=vessel_class_gfw))
 ```
 #### Cross Validation folds
 
-```{r vfolds}
+```{r vfolds, tidy = TRUE}
 set.seed(3435)
 vessels_folds <- vfold_cv(data = vessels_train, v = 3, strata = vessel_class_gfw)
 ```
 
 ## Vessel recipe
 
-```{r recipe}
+```{r recipe, tidy = TRUE}
 
 vessels_recipe <- recipe(vessel_class_gfw ~ length_m_gfw+ mmsi+ tonnage_gt_gfw +
   fishing_hours_2012 + fishing_hours_2015 + fishing_hours_2018 + fishing_hours_2013 +fishing_hours_2016 + fishing_hours_2019 + fishing_hours_2014 + fishing_hours_2017 + fishing_hours_2020, data = vessels_train) %>% 
@@ -553,9 +424,9 @@ vessels_recipe <- recipe(vessel_class_gfw ~ length_m_gfw+ mmsi+ tonnage_gt_gfw +
 We’ll be fitting and tuning an elastic net, tuning penalty and mixture using `multinom_reg` with the glmnet `engine`for classification. We set up a model and workflow, create a regular grid for penalty and mixture with 10 levels each; mixture should range from 0 to 1. The penalty range used is from -5 to 5 (it’s log-scaled).
 
 
-```{r}
+```{r, tidy = TRUE}
 
-# Model
+# Elastic Net Model
 elastic_net_spec <- multinom_reg(penalty = tune(), 
                                  mixture = tune()) %>% 
   set_mode("classification") %>% 
@@ -573,7 +444,7 @@ en_grid <- grid_regular(penalty(range = c(-5, 5)),
 
 Using `library(tictoc)` to print the system running time for my model
 
-```{r}
+```{r elastic tuning hyper}
 library(tictoc)
 tic()
 tune_res_1 <- tune_grid(
@@ -592,7 +463,7 @@ How many total models will you be fitting when you fit these models to your fold
 
 We’re fitting a grid of 100 combinations of values for the hyperparameters penalty and mixture, or 100 models, and we’re fitting each of these once per fold, for a total of 500 models.
 
-```{r}
+```{r tuning resamples}
 tune_res_1 <- tune_grid(
   en_workflow,
   resamples = vessels_folds, 
@@ -604,7 +475,7 @@ autoplot(tune_res_1)
 
 #### Model Prediction, fitting & Visualization
 
-```{r}
+```{r en best}
 best_model <- select_best(tune_res_1, metric = "roc_auc")
 
 en_final <- finalize_workflow(en_workflow, best_model)
@@ -620,7 +491,7 @@ predicted_data %>%
   autoplot(type = "heatmap")
 ```
 
-```{r}
+```{r en pred data}
 predicted_data %>% roc_auc(vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)
 ```
 
@@ -630,8 +501,6 @@ In the heat map, the correct classifications are always on the diagonal and misc
 The model is worst at differentiating; here, the model is worst at identifying Grass- and Water-type, based on the ROC curves. They should also identify those it’s best at; here that appears to be Psychic- and Normal-type.
 
 
-
-
 ### Decision Trees
 
 One of our favorite machine learning algorithms is **decision trees**. A single decision tree generally doesn’t have great “out of the box” model performance, and even with considerable model tuning they are unlikely to perform as well as other approaches. Decision trees are non-parametric, meaning they do not make any assumptions about the underlying data generating process. 
@@ -639,6 +508,7 @@ One of our favorite machine learning algorithms is **decision trees**. A single 
 At their core, decision trees work by splitting the features into a series of yes/no decisions. These splits divide the feature space into a series of non-overlapping regions, where the cases are similar in each region. To understand how a given prediction is made, one simply “follows” the splits of the tree (a branch) to the terminal node (the final prediction). This splitting continues until a specified criterion is met.
 
 #### Decision tree hyperparamters
+
 Decision trees have three hyperparamters as shown below. These are standard hyperparameters and are implemented in {rpart}, the engine used to a fit decision tree models in the previous section. Alternative implementations may have slightly different hyperparameters (see the documentation for `parsnip::decision_tree()` details on other engines).
 
 First,I set up a decision tree model and workflow. Tune the `cost_complexity` hyperparameter using 10 levels, `range = c(-3, -1)` and specify that the metric we want to optimize is `roc_auc`. Lastly, print an `autoplot()` of the results. 
@@ -777,6 +647,7 @@ Which variables were most useful? Which were least useful? Are these results wha
 From the above graph, special attack is the most important variable. Attack, speed,defense, hp,and special are equally as important. 
 
 ```{r vip}
+
 rf_final <- finalize_workflow(class_rf_wflw, select_best(rf_tune)) 
 
 rf_fit <- fit(rf_final, vessels_train)  
@@ -938,3 +809,6 @@ nnet_res <-
 Clavelle, Tyler. “Working with Our Downloadable Public Data in R.” Global Fishing Watch, 29 May 2019, https://globalfishingwatch.org/data/working-with-our-downloadable-public-data-in-r/.
 
 Flanders Marine Institute (2019). Maritime Boundaries Geodatabase: Maritime Boundaries and Exclusive Economic Zones (200NM), version 11. Available online at https://www.marineregions.org/. https://doi.org/10.14284/386
+
+“Harmful Gear: Trawls, Longlines, & Gillnets.” Oceana USA, https://usa.oceana.org/harmful-gear-trawls-longlines-gillnets/. 
+
