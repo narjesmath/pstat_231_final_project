@@ -28,7 +28,7 @@ From the 16 available classes of geartype my outcome variable will be based on t
 
 <img src="images/3d.png" width="300">
 
-Fig2. Visual representation of three principal components from the vessel data
+Fig2.Visual representation of three principal components from the vessel data
 
 1. PCA
 3. Lasso and Elastic-Net Regularized Generalized Linear 
