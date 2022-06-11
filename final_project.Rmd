@@ -361,7 +361,7 @@ components.
 Also note that eigenvectors in R point in the *negative direction* by
 default, so we'll multiply by *-1* to reverse the signs.
 
-```{r pca, tidy = TRUE, message=FALSE, warning=FALSE}
+```{r pca, tidy = TRUE, message=FALSE, warning=FALSE, results ="hide"}
 
 # install.packages("imputeTS")
 
@@ -385,7 +385,7 @@ vessels_pca$rotation
 vessels_pca$x <- -1*vessels_pca$x
 
 #display the first six scores
-head(vessels_pca$x)
+# head(vessels_pca$x)
 
 # Variance explained by each PC
 screeplot(vessels_pca, type = "lines")
@@ -405,7 +405,7 @@ pca2d(
   bg = "white",
   radius = 1,
   shape = 18,
-  palette = palette(hcl.colors(9, "viridis")) )
+  palette = palette(hcl.colors(2, "viridis")) )
 
 pca_3d <- pca3d(
   vessels_pca,
@@ -421,10 +421,12 @@ pca3d(
 
 ```
 
-Error in prcomp.default(.) : cannot rescale a constant/zero column to
-unit variance
 
-The PCA analysis indicates that PC1 & PC2 represents a good amount of the data compare to teh rest.
+The PCA analysis indicates that PC1 & PC2 represents a good amount of the data compare to the rest.
+
+![PCA (CPC1, PC2, PC3)](images/3dpca.png){width="400"}
+
+![PCA (CPC1, PC2, PC3)](images/3dpcawhite.png){width="400"}
 
 #### Data splitting
 
