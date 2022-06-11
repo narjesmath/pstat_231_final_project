@@ -5,62 +5,91 @@ date: '2022-04-10'
 output: 
   rmdformats::material:
     code_folding: hide
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
-
 
 ## Overview
 
-This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets .Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which ~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
+This dataset contains the [Global Fishing
+Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based
+fishing effort and vessel presence datasets .Data is based on fishing
+detections of \>114,000 unique AIS devices on fishing vessels, of which
+\~70,000 are active each year. Fishing vessels are identified via a
+neural network classifier, vessel registry databases, and manual review
+by GFW and regional experts. Data are binned into grid cells 0.01 (or
+0.1) degrees on a side and measured in units of hours. The time is
+calculated by assigning an amount of time to each AIS detection (which
+is the time to the previous position), and then summing all positions in
+each grid cell.
 
-![Fig 1.Map of Apparent Fishing Effort.](images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png){width="500"}
-
-
+![Fig 1.Map of Apparent Fishing
+Effort.](images/GFW-fishingmap-6_10_2022,%2010_52_12%20PM.png){width="500"}
 
 *Data are available in two formats:*
 
-1) Fishing effort by flag state and gear type at 100th degree resolution
-2) Fishing effort by MMSI at 10th degree resolution
+1)  Fishing effort by flag state and gear type at 100th degree
+    resolution
+2)  Fishing effort by MMSI at 10th degree resolution
 
-Each version of the fishing effort dataset is accompanied by a table of vessel information (e.g. gear type, flag state, dimensions, etc.).
+Each version of the fishing effort dataset is accompanied by a table of
+vessel information (e.g. gear type, flag state, dimensions, etc.).
 
-Note: When attempting to download multiple files, you will receive an email containing download links after the data has been packaged. For large requests, it may take up to 24 hours to receive this email.
+Note: When attempting to download multiple files, you will receive an
+email containing download links after the data has been packaged. For
+large requests, it may take up to 24 hours to receive this email.
 
-*Versions* 
+*Versions*
 
-The fishing effort data is updated periodically to include more recent data and as improvements are made to our models and input data.
-Data from different major/minor versions should not be combined, as each version uses a different set of inputs.
+The fishing effort data is updated periodically to include more recent
+data and as improvements are made to our models and input data. Data
+from different major/minor versions should not be combined, as each
+version uses a different set of inputs.
 
 *Current version*
 
-2.0: Fishing effort data for 2012-2020 using our latest AIS algorithms, neural network models, and vessel registry database.
-
+2.0: Fishing effort data for 2012-2020 using our latest AIS algorithms,
+neural network models, and vessel registry database.
 
 ## AIS Data
 
-This MMSI number is usually unique to a single vessel and typically doesn’t change unless the vessel is reflagged. Most of the naval vessels we investigated did appear to use a particular MMSI number consistently even if the vessel only broadcast AIS occasionally. The MMSI numbers used by different naval vessels are listed on sites like MarineTraffic or even Wikipedia. But how can we really be sure that an MMSI number corresponds to a particular naval vessel? Naval vessels are frequently photographed, and it’s possible to get a sequence of port visits based on photos uploaded to sites like warshipcam.com. This documented series o f port visits can then be compared to the AIS track to confirm that an MMSI corresponds to a particular vessel.
-
+This MMSI number is usually unique to a single vessel and typically
+doesn't change unless the vessel is reflagged. Most of the naval vessels
+we investigated did appear to use a particular MMSI number consistently
+even if the vessel only broadcast AIS occasionally. The MMSI numbers
+used by different naval vessels are listed on sites like MarineTraffic
+or even Wikipedia. But how can we really be sure that an MMSI number
+corresponds to a particular naval vessel? Naval vessels are frequently
+photographed, and it's possible to get a sequence of port visits based
+on photos uploaded to sites like warshipcam.com. This documented series
+o f port visits can then be compared to the AIS track to confirm that an
+MMSI corresponds to a particular vessel.
 
 ## Data Wrangling & Exploration
 
-In a snapshot, some of the steps for data exploration in this analysis include :
+In a snapshot, some of the steps for data exploration in this analysis
+include :
 
-* Import data
-* Clean data
-* Format data properly
-* Create new variables
-* Get an overview about the complete data
-* Split data into training and test set using stratified sampling
-* Discover and visualize the data to gain insights
-
+-   Import data
+-   Clean data
+-   Format data properly
+-   Create new variables
+-   Get an overview about the complete data
+-   Split data into training and test set using stratified sampling
+-   Discover and visualize the data to gain insights
 
 ```{r setup, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-#### Load Packages 
+#### Load Packages
 
-We will use several R packages to work with the data. The tidyverse package contains several helpful packages for data manipulation (dplyr, tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working with dates. The `tidymodels()` package is key to this analysis for setting up all the models for machine learning.
-
+We will use several R packages to work with the data. The tidyverse
+package contains several helpful packages for data manipulation (dplyr,
+tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working
+with dates. The `tidymodels()` package is key to this analysis for
+setting up all the models for machine learning.
 
 ```{r load packages, tidy = TRUE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
@@ -115,21 +144,41 @@ library(kableExtra)
 # library(bigrquery) #Interface to Google's 'BigQuery' 'API'
 ```
 
-
 ## Import Data
 
-Daily fishing effort data are available for download in the following two formats:
+Daily fishing effort data are available for download in the following
+two formats:
 
-- Daily Fishing Effort and Vessel Presence at **100th** Degree Resolution by Flag State and GearType, 2012-2020
-- Daily Fishing Effort and at **10th** Degree Resolution by MMSI, 2012-2020
+-   Daily Fishing Effort and Vessel Presence at **100th** Degree
+    Resolution by Flag State and GearType, 2012-2020
+-   Daily Fishing Effort and at **10th** Degree Resolution by MMSI,
+    2012-2020
 
-Upon downloading each dataset, users will receive a `.zip` file containing a folder named fishing_effort (or fishing_effort_byvessel) that itself contains the data readme.txt file and the daily_csvs folder. The daily csvs are named according to the *YYYY-MM-DD.csv* format. The files generally increase in size over time due to the higher number of satellites receiving AIS data. Since we will be using both datasets, let’s rename the fishing_effort folder to fishing_effort_byflag and then store both the fishing_effort_byflag and fishing_effort_byvessel folders within a directory called fishing_effort.
+Upon downloading each dataset, users will receive a `.zip` file
+containing a folder named fishing_effort (or fishing_effort_byvessel)
+that itself contains the data readme.txt file and the daily_csvs folder.
+The daily csvs are named according to the *YYYY-MM-DD.csv* format. The
+files generally increase in size over time due to the higher number of
+satellites receiving AIS data. Since we will be using both datasets,
+let's rename the fishing_effort folder to fishing_effort_byflag and then
+store both the fishing_effort_byflag and fishing_effort_byvessel folders
+within a directory called fishing_effort.
 
-Data containing details on the fishing vessels included in the fishing effort datasets are also available. These data can be used in conjunction with the “Daily Fishing Effort and at 10th Degree Resolution by MMSI” data to explore vessel and fleet characteristics and provide details (gear type, flag state, etc.) for the MMSI being analyzed.
+Data containing details on the fishing vessels included in the fishing
+effort datasets are also available. These data can be used in
+conjunction with the "Daily Fishing Effort and at 10th Degree Resolution
+by MMSI" data to explore vessel and fleet characteristics and provide
+details (gear type, flag state, etc.) for the MMSI being analyzed.
 
 #### Shapefiles
 
-Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are useful for providing context to maps of fishing effort. For this analysis, we’ll use a land shapefile from the maps R package and an **EEZ shapefile** from **MarineRegions.org**. We’ll also load/convert both of these **shapefiles** to sf objects. The `sf` R package is a great package for working with vector data stored in dataframes, providing numerous functions for performing spatial operations.
+Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are
+useful for providing context to maps of fishing effort. For this
+analysis, we'll use a land shapefile from the maps R package and an
+**EEZ shapefile** from **MarineRegions.org**. We'll also load/convert
+both of these **shapefiles** to sf objects. The `sf` R package is a
+great package for working with vector data stored in dataframes,
+providing numerous functions for performing spatial operations.
 
 #### World polygons from the maps package
 
@@ -153,38 +202,48 @@ load("vessels.Rda")
 
 ```
 
-
 ## Geartypes:
 
-The current version of the GFW vessel classification neural net classifies fishing vessels into sixteen categories.
+The current version of the GFW vessel classification neural net
+classifies fishing vessels into sixteen categories.
 
-![Fig 2.Map of Apparent Fishing Effort.](images/rawai LongLine.jpeg){width="500"}
+![Fig 2.Map of Apparent Fishing
+Effort.](images/rawai%20LongLine.jpeg){width="500"}
 
-Longline fishermen use lines that can extend for up to 50 miles, with thousands of baited hooks branching off from the main line. Unfortunately, the baited hooks attract a vast array of species that are not intentionally targeted, including diving birds, turtles, etc. If an animal becomes hooked, it is often seriously injured or dead by the time the gear is retrieved. Using more selective gear instead of longlines is proven to reduce bycatch and improve fishing efficiency.(oceana.org)
+Longline fishermen use lines that can extend for up to 50 miles, with
+thousands of baited hooks branching off from the main line.
+Unfortunately, the baited hooks attract a vast array of species that are
+not intentionally targeted, including diving birds, turtles, etc. If an
+animal becomes hooked, it is often seriously injured or dead by the time
+the gear is retrieved. Using more selective gear instead of longlines is
+proven to reduce bycatch and improve fishing efficiency.(oceana.org)
 
-Some classes of the outcome variable chosen for this analysis are described below :
+Some classes of the outcome variable chosen for this analysis are
+described below :
 
-- `fishing`: a combination of vessels of unknown fishing gear
-- `drifting_longlines`: drifting longlines
-- `seiners`: vessels using seine nets, including potential purse seine vessels
-   targeting tuna and other species, as well as danish and other seines
-- `purse_seines`: purse seines, both pelagic and demersal
-- `tuna_purse_seines`: large purse seines primarily fishing for tuna.
-- `other_purse_seines`: purse seiners fishing for mackerel, anchovies, etc, often smaller and operating nearer the    coast than tuna purse seines.
-- `other_seines`: danish seines and other seiners not using purse seines.
-- `trawlers`: trawlers, all types
-- `pole_and_line`: vessel from which people fish with pole and line.
-- `trollers`: vessel that tows multiple fishing lines.
-- `fixed_gear`: a category that includes potential set longlines, set gillnets,  and pots and traps
-   
-
+-   `fishing`: a combination of vessels of unknown fishing gear
+-   `drifting_longlines`: drifting longlines
+-   `seiners`: vessels using seine nets, including potential purse seine
+    vessels targeting tuna and other species, as well as danish and
+    other seines
+-   `purse_seines`: purse seines, both pelagic and demersal
+-   `tuna_purse_seines`: large purse seines primarily fishing for tuna.
+-   `other_purse_seines`: purse seiners fishing for mackerel, anchovies,
+    etc, often smaller and operating nearer the coast than tuna purse
+    seines.
+-   `other_seines`: danish seines and other seiners not using purse
+    seines.
+-   `trawlers`: trawlers, all types
+-   `pole_and_line`: vessel from which people fish with pole and line.
+-   `trollers`: vessel that tows multiple fishing lines.
+-   `fixed_gear`: a category that includes potential set longlines, set
+    gillnets, and pots and traps
 
 ## Vessel Gear {.tabset .tabset-fade .tabset-pills}
 
-
 ## Exploratory Data Analysis
 
-```{r vessels eda, tidy = TRUE}
+```{r vessels eda, tidy = TRUE,fig.height=10, fig.width=20, tidy= TRUE}
 #To get a first impression of the data we take a look at the top 4 rows:
 # install.packages("gt")
 library(gt)
@@ -220,18 +279,18 @@ vessels %>%
 panel.grid = element_blank(), legend.key = NULL)+
   coord_flip()  
 
-``` 
+```
 
-* There are sixteen levels of the outcome, or primary classes of geartype, in the data. The classes with the smallest numbers of geartype are seiners,trollers, pure seine and other seines.
+-   There are sixteen levels of the outcome, or primary classes of
+    geartype, in the data. The classes with the smallest numbers of
+    geartype are seiners,trollers, pure seine and other seines.
 
-* We’ll handle the smaller classes by simply filtering them out. Filter the entire data set to contain only fleets whose geartype is set_longlines, set_gillnets, squid_jigger, tuna_purse_seines, fixed_gear, pole_and_line.
-
-
+-   We'll handle the smaller classes by simply filtering them out.
+    Filter the entire data set to contain only fleets whose geartype is
+    set_longlines, set_gillnets, squid_jigger, tuna_purse_seines,
+    fixed_gear, pole_and_line.
 
 ```{r, tidy = TRUE}
-
-# # Specify new (lower) resolution in degrees for aggregating data
-# res <- 0.25
 
 # Creating a vessels df and filtering for the geartype of choice
 
@@ -256,6 +315,10 @@ mutate(prop = n/sum(n)) %>%
   column_spec( 1:3, width = "10em") %>% 
   kable_styling(bootstrap_options = "striped")
 
+# Na's
+# is.na(vessels_sub) %>% colSums()
+vis_dat(vessels_sub)
+
 
 # Visualization the classes of our our outcome variable
 vessels_sub %>% 
@@ -269,21 +332,25 @@ panel.grid = element_blank(), legend.key = NULL)+
 
 ```
 
-
-
-
 ## Machine Learning Models
-
 
 ### Principal components analysis (PCA)
 
-Principal components analysis is an ordination method allowing us to glean as much about our multivariate data as possible in a simplified number of dimensions. Here, we'll use our dataset of fishing vessels to explore variable relationships and clustering by geartype in a PCA biplot. For this example with PCA, we will only use *the structure size measurements (bill length and depth, mass, and flipper length)*.
+Principal components analysis is an ordination method allowing us to
+glean as much about our multivariate data as possible in a simplified
+number of dimensions. Here, we'll use our dataset of fishing vessels to
+explore variable relationships and clustering by geartype in a PCA
+biplot. For this example with PCA, we will only use *the structure size
+measurements (bill length and depth, mass, and flipper length)*.
 
-We use the R built-in function `prcomp()` to calculate the principal components of the dataset.
-It's important to specify `scale = TRUE` so that each of the variables in the dataset are scaled to have a mean of 0 and a standard deviation of 1 before calculating the principal components.
+We use the R built-in function `prcomp()` to calculate the principal
+components of the dataset. It's important to specify `scale = TRUE` so
+that each of the variables in the dataset are scaled to have a mean of 0
+and a standard deviation of 1 before calculating the principal
+components.
 
-Also note that eigenvectors in R point in the *negative direction* by default, so we’ll multiply by *-1* to reverse the signs.
-
+Also note that eigenvectors in R point in the *negative direction* by
+default, so we'll multiply by *-1* to reverse the signs.
 
 ```{r pca, tidy = TRUE, message=FALSE, warning=FALSE}
 
@@ -317,7 +384,7 @@ screeplot(vessels_pca, type = "barplot")
 
 
 
-library(pca3d)
+library(pca3d) # 2d & 3d pca plots
 
 pca2d(
    vessels_pca,
@@ -344,8 +411,13 @@ pca3d(
     axes.color= "white", new= TRUE) 
 
 ```
-Error in prcomp.default(.) : 
-cannot rescale a constant/zero column to unit variance
+
+Error in prcomp.default(.) : cannot rescale a constant/zero column to
+unit variance
+
+The PCA analysis indicates that PC1 & PC2 represents a good amount of the data compare to teh rest.
+
+#### Data splitting
 
 ```{r data split, tidy = TRUE}
 
@@ -356,13 +428,15 @@ set.seed(3435)
 vessels_split <- initial_split(vessels_sub, prop = 0.8, strata = vessel_class_gfw)
 vessels_train <- training(vessels_split)
 vessels_test <- testing(vessels_split)
-dim(vessels_train)
+# dim(vessels_train)
 
 ```
 
+In order to have a good training set, we set up prop equal to 80% and our training set has 29 variables with 7998 obs.
+
 #### Training set Visualisation
 
- a. Corrplot
+a.  Corrplot
 
 ```{r corrplot, tidy = TRUE}
 vessels_train %>% 
@@ -373,21 +447,35 @@ vessels_train %>%
   corrplot(type = "lower", diag = FALSE)
 ```
 
- b. Barplot
+From the corrplot, we can see that tonnage_gt_ registery and engine_power_kw_gfw are positively correlated but length_mregitery is negatively correlated with engine power.
+
+b.  Barplot
 
 ```{r barplot, tidy = TRUE}
 vessels_train %>% 
   ggplot(aes(x = vessel_class_gfw)) +
   geom_bar(aes(fill=vessel_class_gfw))
 ```
+
+From the barplot of the chosen predictors : "set_longlines", "set_gillnets", "tuna_purse_seines",	"fishing",			
+"other_purse_seines","	drifting_longlines". We notice that `fishng` class has more observations than the others.
+
+
 #### Cross Validation folds
+
+For the cross-validation, I'm using v = 3 folds and stratifying the outcome variable for geartype `vessel_class_gfw`.
 
 ```{r vfolds, tidy = TRUE}
 set.seed(3435)
 vessels_folds <- vfold_cv(data = vessels_train, v = 3, strata = vessel_class_gfw)
 ```
 
+Using a subset of the data and given that the training set only has 29 vars and many observations. we chose to use a lower **v-folds** to avoid having an imbalance in a given class where an outcome variable may either be present or not.
+
 ## Vessel recipe
+
+In this section, we chose our model recipe : predictors  for the outcome variable. 
+Note that I used `na.replace(0)` for the fishing hours yearly variables due to to the large numbers of missing data.
 
 ```{r recipe, tidy = TRUE}
 
@@ -406,12 +494,13 @@ vessels_recipe <- recipe(vessel_class_gfw ~ length_m_gfw+ mmsi+ tonnage_gt_gfw +
 # glimpse(prepped_data)
 ```
 
-
-
 #### Elastic Tuning Net
 
-We’ll be fitting and tuning an elastic net, tuning penalty and mixture using `multinom_reg` with the glmnet `engine`for classification. We set up a model and workflow, create a regular grid for penalty and mixture with 10 levels each; mixture should range from 0 to 1. The penalty range used is from -5 to 5 (it’s log-scaled).
-
+We'll be fitting and tuning an elastic net, tuning penalty and mixture
+using `multinom_reg` with the glmnet `engine`for classification. We set
+up a model and workflow, create a regular grid for penalty and mixture
+with 10 levels each; mixture should range from 0 to 1. The penalty range
+used is from -5 to 5 (it's log-scaled).
 
 ```{r, tidy = TRUE}
 
@@ -448,9 +537,10 @@ ggplot2::autoplot(tune_res_1)
 toc()
 ```
 
-How many total models will you be fitting when you fit these models to your folded data?
 
-We’re fitting a grid of 100 combinations of values for the hyperparameters penalty and mixture, or 100 models, and we’re fitting each of these once per fold, for a total of 500 models.
+We're fitting a grid of 100 combinations of values for the
+hyperparameters penalty and mixture, or 100 models, and we're fitting
+each of these once per fold, for a total of 200 models.
 
 ```{r tuning resamples}
 tune_res_1 <- tune_grid(
@@ -484,23 +574,46 @@ predicted_data %>%
 predicted_data %>% roc_auc(vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)
 ```
 
+In the heat map, the correct classifications are always on the diagonal
+and misclassifications on the off-diagonals. The model correctly
+identified 18/30 Normal-type, for example. From the heat map, we can see
+that the model doesn't seem to be able to distinguish Water-type well at
+all; it misclassifies other types as Water frequently, especially Grass.
 
-In the heat map, the correct classifications are always on the diagonal and misclassifications on the off-diagonals. The model correctly identified 18/30 Normal-type, for example. From the heat map, we can see that the model doesn’t seem to be able to distinguish Water-type well at all; it misclassifies other types as Water frequently, especially Grass.
-
-The model is worst at differentiating; here, the model is worst at identifying Grass- and Water-type, based on the ROC curves. They should also identify those it’s best at; here that appears to be Psychic- and Normal-type.
-
+The model is worst at differentiating; here, the model is worst at
+identifying Grass- and Water-type, based on the ROC curves. They should
+also identify those it's best at; here that appears to be Psychic- and
+Normal-type.
 
 ### Decision Trees
 
-One of our favorite machine learning algorithms is **decision trees**. A single decision tree generally doesn’t have great “out of the box” model performance, and even with considerable model tuning they are unlikely to perform as well as other approaches. Decision trees are non-parametric, meaning they do not make any assumptions about the underlying data generating process. 
+One of our favorite machine learning algorithms is **decision trees**. A
+single decision tree generally doesn't have great "out of the box" model
+performance, and even with considerable model tuning they are unlikely
+to perform as well as other approaches. Decision trees are
+non-parametric, meaning they do not make any assumptions about the
+underlying data generating process.
 
-At their core, decision trees work by splitting the features into a series of yes/no decisions. These splits divide the feature space into a series of non-overlapping regions, where the cases are similar in each region. To understand how a given prediction is made, one simply “follows” the splits of the tree (a branch) to the terminal node (the final prediction). This splitting continues until a specified criterion is met.
+At their core, decision trees work by splitting the features into a
+series of yes/no decisions. These splits divide the feature space into a
+series of non-overlapping regions, where the cases are similar in each
+region. To understand how a given prediction is made, one simply
+"follows" the splits of the tree (a branch) to the terminal node (the
+final prediction). This splitting continues until a specified criterion
+is met.
 
 #### Decision tree hyperparamters
 
-Decision trees have three hyperparamters as shown below. These are standard hyperparameters and are implemented in {rpart}, the engine used to a fit decision tree models in the previous section. Alternative implementations may have slightly different hyperparameters (see the documentation for `parsnip::decision_tree()` details on other engines).
+Decision trees have three hyperparamters as shown below. These are
+standard hyperparameters and are implemented in {rpart}, the engine used
+to a fit decision tree models in the previous section. Alternative
+implementations may have slightly different hyperparameters (see the
+documentation for `parsnip::decision_tree()` details on other engines).
 
-First,I set up a decision tree model and workflow. Tune the `cost_complexity` hyperparameter using 10 levels, `range = c(-3, -1)` and specify that the metric we want to optimize is `roc_auc`. Lastly, print an `autoplot()` of the results. 
+First,I set up a decision tree model and workflow. Tune the
+`cost_complexity` hyperparameter using 10 levels, `range = c(-3, -1)`
+and specify that the metric we want to optimize is `roc_auc`. Lastly,
+print an `autoplot()` of the results.
 
 ```{r decision tree}
 
@@ -532,10 +645,8 @@ tune_res_tr <- tune_grid(
 autoplot(tune_res_tr)
 ```
 
-
-A single decision tree performs better with larger complexity penalty( peak at mid level complexity)
-
-
+A single decision tree performs better with larger complexity penalty(
+peak at mid level complexity)
 
 ```{r decision tree metrics}
 tree_metrics <- collect_metrics(tune_res_tr) %>% 
@@ -546,10 +657,10 @@ best_complexity <- select_best(tune_res_tr )
 
 The `roc_auc` of my best-performing pruned decision tree on the folds is
 
-
 #### Decision Tree Visualization
 
-Using `rpart.plot`, I fit and visualize my best-performing pruned decision tree with the *training* set.
+Using `rpart.plot`, I fit and visualize my best-performing pruned
+decision tree with the *training* set.
 
 ```{r decision tree final fit}
 class_tree_final <- finalize_workflow(class_tree_wf, best_complexity)
@@ -561,25 +672,28 @@ class_tree_final_fit %>%
   rpart.plot()
 ```
 
-
 #### Random forest
 
-In this section, I set up a random forest model with `rand_forest()`, a workflow using the `ranger` engine and  set `importance = "impurity"`. Then, once again I will tune `mtry`, `trees`, and `min_n`. 
+In this section, I set up a random forest model with `rand_forest()`, a
+workflow using the `ranger` engine and set `importance = "impurity"`.
+Then, once again I will tune `mtry`, `trees`, and `min_n`.
 
 #### Random forest tree hyperparamters
 
-I start by creating a regular grid with 8 levels each. For each hyperparameter (i.e. this model has 3 tuning parameters I specify the following ranges :  
+I start by creating a regular grid with 8 levels each. For each
+hyperparameter (i.e. this model has 3 tuning parameters I specify the
+following ranges :
 
+mtry: \# Randomly Selected Predictors reduce variance because `mtry`
+allows to choose vars randomly. Depends on the number of columns. mtry =
+P/3 or sqrt P Note that `mtry` should not be smaller than 1 or larger
+than 8.
 
-mtry: # Randomly Selected Predictors reduce variance because `mtry` allows to choose vars randomly. Depends on the number of columns. mtry = P/3 or sqrt P
-Note that `mtry` should not be smaller than 1 or larger than 8.
+trees: \# Trees (type: integer, default: 500L)
 
-trees: # Trees (type: integer, default: 500L)
-
-min_n: (stopping criterion) defines the minimal node size 
-(node 1 and has 10 obs). min_n depends on the mode. For regression, a value of 5 is the default. For classification, a value of 10 is used.
-
-
+min_n: (stopping criterion) defines the minimal node size (node 1 and
+has 10 obs). min_n depends on the mode. For regression, a value of 5 is
+the default. For classification, a value of 10 is used.
 
 ```{r random forest}
 
@@ -624,16 +738,16 @@ best_complexity_rf
 
 ```
 
-
 #### Random forest Predictions
 
+Using `vip()`, with your best-performing random forest model fit on the
+*training* set.
 
-Using `vip()`, with your best-performing random forest model fit on the *training* set.
+Which variables were most useful? Which were least useful? Are these
+results what you expected, or not?
 
-Which variables were most useful? Which were least useful? Are these results what you expected, or not?
-
-
-From the above graph, special attack is the most important variable. Attack, speed,defense, hp,and special are equally as important. 
+From the above graph, special attack is the most important variable.
+Attack, speed,defense, hp,and special are equally as important.
 
 ```{r vip}
 
@@ -648,10 +762,13 @@ rf_fit <- fit(rf_final, vessels_train)
  vip_rf
 ```
 
-
 ### Boosted tree
 
-Here, I set up a boosted tree model and workflow using the `xgboost` engine. Then, I use `tune()` to set a boosted model trees. The grid used below contains 10 levels; where `trees` range from 10 to 2000. Lastly, I specify `roc_auc`  in my model metrics and print an `autoplot()` to view the results. 
+Here, I set up a boosted tree model and workflow using the `xgboost`
+engine. Then, I use `tune()` to set a boosted model trees. The grid used
+below contains 10 levels; where `trees` range from 10 to 2000. Lastly, I
+specify `roc_auc` in my model metrics and print an `autoplot()` to view
+the results.
 
 ```{r boosted tree}
 boost_model = boost_tree(trees = tune()) %>% #set up boosted tree model
@@ -681,9 +798,7 @@ boost_results <- readRDS("boost_tune.RDS")
 autoplot(boost_tune_res) 
 ```
 
-
 ROC AUC peaks at around 400 trees and then slowly declines again.
-
 
 ```{r}
 boost_metrics <- collect_metrics(boost_tune_res) %>% 
@@ -700,13 +815,15 @@ The `roc_auc` of your best-performing boosted tree model on the folds
 models = full_join(tree_metrics, rf_tree_metrics)
 joined_models = full_join(models, boost_metrics)
 joined_models 
-```   
+```
 
 The best model is the random forest model, with an AUC ROC of 0.628.
 
 #### Best-performing model
 
-Print the AUC value of your best-performing model on the testing set. Print the ROC curves. Finally, create and visualize a confusion matrix heat map.
+Print the AUC value of your best-performing model on the testing set.
+Print the ROC curves. Finally, create and visualize a confusion matrix
+heat map.
 
 ```{r}
 rf_test_fit = augment(rf_fit, new_data = vessels_test) 
@@ -723,8 +840,7 @@ conf_mat(rf_test_fit, truth = type_1, estimate = .pred_class) %>%
   theme(axis.text.x = element_text(angle = 90, hjust=1)) 
 ```
 
-
-####  K-nearest neighbor
+#### K-nearest neighbor
 
 ```{r knn}
 library(kknn)
@@ -757,7 +873,6 @@ knn_res %>% collect_metrics(summarize = TRUE)
 
 #### Neural network
 
-
 ```{r neural network}
  # ?keras::install_keras()
 # install_keras(Tensorflow = "1.13.1",
@@ -786,18 +901,30 @@ nnet_res <-
     ) 
 ```
 
-
 ## Conclusion
 
 ## References
 
-“Copyright [2022], Global Fishing Watch, Inc., www.globalfishingwatch.org.”
+"Copyright [2022], Global Fishing Watch, Inc.,
+www.globalfishingwatch.org."
 
-<em>“Global Fishing Watch has made every attempt to ensure the completeness, accuracy and reliability of the information provided on this Site. However, due to the nature and inherent limitations in source materials for information provided, Global Fishing Watch qualifies all designations of vessel fishing activity, including synonyms of the term “fishing activity,” such as “fishing” or “fishing effort,” as “apparent,” rather than certain.  And accordingly, the information is provided “as is” without warranty of any kind.”</em>
+<em>"Global Fishing Watch has made every attempt to ensure the
+completeness, accuracy and reliability of the information provided on
+this Site. However, due to the nature and inherent limitations in source
+materials for information provided, Global Fishing Watch qualifies all
+designations of vessel fishing activity, including synonyms of the term
+"fishing activity," such as "fishing" or "fishing effort," as
+"apparent," rather than certain. And accordingly, the information is
+provided "as is" without warranty of any kind."</em>
 
-Clavelle, Tyler. “Working with Our Downloadable Public Data in R.” Global Fishing Watch, 29 May 2019, https://globalfishingwatch.org/data/working-with-our-downloadable-public-data-in-r/.
+Clavelle, Tyler. "Working with Our Downloadable Public Data in R."
+Global Fishing Watch, 29 May 2019,
+<https://globalfishingwatch.org/data/working-with-our-downloadable-public-data-in-r/>.
 
-Flanders Marine Institute (2019). Maritime Boundaries Geodatabase: Maritime Boundaries and Exclusive Economic Zones (200NM), version 11. Available online at https://www.marineregions.org/. https://doi.org/10.14284/386
+Flanders Marine Institute (2019). Maritime Boundaries Geodatabase:
+Maritime Boundaries and Exclusive Economic Zones (200NM), version 11.
+Available online at <https://www.marineregions.org/>.
+<https://doi.org/10.14284/386>
 
-“Harmful Gear: Trawls, Longlines, & Gillnets.” Oceana USA, https://usa.oceana.org/harmful-gear-trawls-longlines-gillnets/. 
-
+"Harmful Gear: Trawls, Longlines, & Gillnets." Oceana USA,
+<https://usa.oceana.org/harmful-gear-trawls-longlines-gillnets/>.

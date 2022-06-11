@@ -2,65 +2,94 @@
 title: "Vessel Activity-Global Fishing Watch"
 author: "Narjes Mathlouthi"
 date: '2022-04-10'
-output:
+output: 
   rmdformats::material:
     code_folding: hide
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
+## Overview {style="#ADD8E6"}
 
-## Overview
+This dataset contains the [Global Fishing
+Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based
+fishing effort and vessel presence datasets .Data is based on fishing
+detections of \>114,000 unique AIS devices on fishing vessels, of which
+\~70,000 are active each year. Fishing vessels are identified via a
+neural network classifier, vessel registry databases, and manual review
+by GFW and regional experts. Data are binned into grid cells 0.01 (or
+0.1) degrees on a side and measured in units of hours. The time is
+calculated by assigning an amount of time to each AIS detection (which
+is the time to the previous position), and then summing all positions in
+each grid cell.
 
-This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets .Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which ~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
-
-![Fig 1.Map of Apparent Fishing Effort.](images/GFW-fishingmap-6_10_2022, 10_52_12 PM.png){width="500"}
-
-
+![Fig 1.Map of Apparent Fishing
+Effort.](images/GFW-fishingmap-6_10_2022,%2010_52_12%20PM.png){width="500"}
 
 *Data are available in two formats:*
 
-1) Fishing effort by flag state and gear type at 100th degree resolution
-2) Fishing effort by MMSI at 10th degree resolution
+1)  Fishing effort by flag state and gear type at 100th degree
+    resolution
+2)  Fishing effort by MMSI at 10th degree resolution
 
-Each version of the fishing effort dataset is accompanied by a table of vessel information (e.g. gear type, flag state, dimensions, etc.).
+Each version of the fishing effort dataset is accompanied by a table of
+vessel information (e.g. gear type, flag state, dimensions, etc.).
 
-Note: When attempting to download multiple files, you will receive an email containing download links after the data has been packaged. For large requests, it may take up to 24 hours to receive this email.
+Note: When attempting to download multiple files, you will receive an
+email containing download links after the data has been packaged. For
+large requests, it may take up to 24 hours to receive this email.
 
-*Versions* 
+*Versions*
 
-The fishing effort data is updated periodically to include more recent data and as improvements are made to our models and input data.
-Data from different major/minor versions should not be combined, as each version uses a different set of inputs.
+The fishing effort data is updated periodically to include more recent
+data and as improvements are made to our models and input data. Data
+from different major/minor versions should not be combined, as each
+version uses a different set of inputs.
 
 *Current version*
 
-2.0: Fishing effort data for 2012-2020 using our latest AIS algorithms, neural network models, and vessel registry database.
+2.0: Fishing effort data for 2012-2020 using our latest AIS algorithms,
+neural network models, and vessel registry database.
 
+## AIS Data {style="#ADD8E6"}
 
-## AIS Data
-
-This MMSI number is usually unique to a single vessel and typically doesn’t change unless the vessel is reflagged. Most of the naval vessels we investigated did appear to use a particular MMSI number consistently even if the vessel only broadcast AIS occasionally. The MMSI numbers used by different naval vessels are listed on sites like MarineTraffic or even Wikipedia. But how can we really be sure that an MMSI number corresponds to a particular naval vessel? Naval vessels are frequently photographed, and it’s possible to get a sequence of port visits based on photos uploaded to sites like warshipcam.com. This documented series o f port visits can then be compared to the AIS track to confirm that an MMSI corresponds to a particular vessel.
-
+This MMSI number is usually unique to a single vessel and typically
+doesn't change unless the vessel is reflagged. Most of the naval vessels
+we investigated did appear to use a particular MMSI number consistently
+even if the vessel only broadcast AIS occasionally. The MMSI numbers
+used by different naval vessels are listed on sites like MarineTraffic
+or even Wikipedia. But how can we really be sure that an MMSI number
+corresponds to a particular naval vessel? Naval vessels are frequently
+photographed, and it's possible to get a sequence of port visits based
+on photos uploaded to sites like warshipcam.com. This documented series
+o f port visits can then be compared to the AIS track to confirm that an
+MMSI corresponds to a particular vessel.
 
 ## Data Wrangling & Exploration
 
-In a snapshot, some of the steps for data exploration in this analysis include :
+In a snapshot, some of the steps for data exploration in this analysis
+include :
 
-* Import data
-* Clean data
-* Format data properly
-* Create new variables
-* Get an overview about the complete data
-* Split data into training and test set using stratified sampling
-* Discover and visualize the data to gain insights
-
+-   Import data
+-   Clean data
+-   Format data properly
+-   Create new variables
+-   Get an overview about the complete data
+-   Split data into training and test set using stratified sampling
+-   Discover and visualize the data to gain insights
 
 ```{r setup, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-#### Load Packages 
+#### Load Packages
 
-We will use several R packages to work with the data. The tidyverse package contains several helpful packages for data manipulation (dplyr, tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working with dates. The `tidymodels()` package is key to this analysis for setting up all the models for machine learning.
-
+We will use several R packages to work with the data. The tidyverse
+package contains several helpful packages for data manipulation (dplyr,
+tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working
+with dates. The `tidymodels()` package is key to this analysis for
+setting up all the models for machine learning.
 
 ```{r load packages, tidy = TRUE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
@@ -115,21 +144,41 @@ library(kableExtra)
 # library(bigrquery) #Interface to Google's 'BigQuery' 'API'
 ```
 
-
 ## Import Data
 
-Daily fishing effort data are available for download in the following two formats:
+Daily fishing effort data are available for download in the following
+two formats:
 
-- Daily Fishing Effort and Vessel Presence at **100th** Degree Resolution by Flag State and GearType, 2012-2020
-- Daily Fishing Effort and at **10th** Degree Resolution by MMSI, 2012-2020
+-   Daily Fishing Effort and Vessel Presence at **100th** Degree
+    Resolution by Flag State and GearType, 2012-2020
+-   Daily Fishing Effort and at **10th** Degree Resolution by MMSI,
+    2012-2020
 
-Upon downloading each dataset, users will receive a `.zip` file containing a folder named fishing_effort (or fishing_effort_byvessel) that itself contains the data readme.txt file and the daily_csvs folder. The daily csvs are named according to the *YYYY-MM-DD.csv* format. The files generally increase in size over time due to the higher number of satellites receiving AIS data. Since we will be using both datasets, let’s rename the fishing_effort folder to fishing_effort_byflag and then store both the fishing_effort_byflag and fishing_effort_byvessel folders within a directory called fishing_effort.
+Upon downloading each dataset, users will receive a `.zip` file
+containing a folder named fishing_effort (or fishing_effort_byvessel)
+that itself contains the data readme.txt file and the daily_csvs folder.
+The daily csvs are named according to the *YYYY-MM-DD.csv* format. The
+files generally increase in size over time due to the higher number of
+satellites receiving AIS data. Since we will be using both datasets,
+let's rename the fishing_effort folder to fishing_effort_byflag and then
+store both the fishing_effort_byflag and fishing_effort_byvessel folders
+within a directory called fishing_effort.
 
-Data containing details on the fishing vessels included in the fishing effort datasets are also available. These data can be used in conjunction with the “Daily Fishing Effort and at 10th Degree Resolution by MMSI” data to explore vessel and fleet characteristics and provide details (gear type, flag state, etc.) for the MMSI being analyzed.
+Data containing details on the fishing vessels included in the fishing
+effort datasets are also available. These data can be used in
+conjunction with the "Daily Fishing Effort and at 10th Degree Resolution
+by MMSI" data to explore vessel and fleet characteristics and provide
+details (gear type, flag state, etc.) for the MMSI being analyzed.
 
 #### Shapefiles
 
-Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are useful for providing context to maps of fishing effort. For this analysis, we’ll use a land shapefile from the maps R package and an **EEZ shapefile** from **MarineRegions.org**. We’ll also load/convert both of these **shapefiles** to sf objects. The `sf` R package is a great package for working with vector data stored in dataframes, providing numerous functions for performing spatial operations.
+Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are
+useful for providing context to maps of fishing effort. For this
+analysis, we'll use a land shapefile from the maps R package and an
+**EEZ shapefile** from **MarineRegions.org**. We'll also load/convert
+both of these **shapefiles** to sf objects. The `sf` R package is a
+great package for working with vector data stored in dataframes,
+providing numerous functions for performing spatial operations.
 
 #### World polygons from the maps package
 
@@ -153,38 +202,48 @@ load("vessels.Rda")
 
 ```
 
-
 ## Geartypes:
 
-The current version of the GFW vessel classification neural net classifies fishing vessels into sixteen categories.
+The current version of the GFW vessel classification neural net
+classifies fishing vessels into sixteen categories.
 
-![Fig 2.Map of Apparent Fishing Effort.](images/rawai LongLine.jpeg){width="500"}
+![Fig 2.Map of Apparent Fishing
+Effort.](images/rawai%20LongLine.jpeg){width="500"}
 
-Longline fishermen use lines that can extend for up to 50 miles, with thousands of baited hooks branching off from the main line. Unfortunately, the baited hooks attract a vast array of species that are not intentionally targeted, including diving birds, turtles, etc. If an animal becomes hooked, it is often seriously injured or dead by the time the gear is retrieved. Using more selective gear instead of longlines is proven to reduce bycatch and improve fishing efficiency.(oceana.org)
+Longline fishermen use lines that can extend for up to 50 miles, with
+thousands of baited hooks branching off from the main line.
+Unfortunately, the baited hooks attract a vast array of species that are
+not intentionally targeted, including diving birds, turtles, etc. If an
+animal becomes hooked, it is often seriously injured or dead by the time
+the gear is retrieved. Using more selective gear instead of longlines is
+proven to reduce bycatch and improve fishing efficiency.(oceana.org)
 
-Some classes of the outcome variable chosen for this analysis are described below :
+Some classes of the outcome variable chosen for this analysis are
+described below :
 
-- `fishing`: a combination of vessels of unknown fishing gear
-- `drifting_longlines`: drifting longlines
-- `seiners`: vessels using seine nets, including potential purse seine vessels
-   targeting tuna and other species, as well as danish and other seines
-- `purse_seines`: purse seines, both pelagic and demersal
-- `tuna_purse_seines`: large purse seines primarily fishing for tuna.
-- `other_purse_seines`: purse seiners fishing for mackerel, anchovies, etc, often smaller and operating nearer the    coast than tuna purse seines.
-- `other_seines`: danish seines and other seiners not using purse seines.
-- `trawlers`: trawlers, all types
-- `pole_and_line`: vessel from which people fish with pole and line.
-- `trollers`: vessel that tows multiple fishing lines.
-- `fixed_gear`: a category that includes potential set longlines, set gillnets,  and pots and traps
-   
-
+-   `fishing`: a combination of vessels of unknown fishing gear
+-   `drifting_longlines`: drifting longlines
+-   `seiners`: vessels using seine nets, including potential purse seine
+    vessels targeting tuna and other species, as well as danish and
+    other seines
+-   `purse_seines`: purse seines, both pelagic and demersal
+-   `tuna_purse_seines`: large purse seines primarily fishing for tuna.
+-   `other_purse_seines`: purse seiners fishing for mackerel, anchovies,
+    etc, often smaller and operating nearer the coast than tuna purse
+    seines.
+-   `other_seines`: danish seines and other seiners not using purse
+    seines.
+-   `trawlers`: trawlers, all types
+-   `pole_and_line`: vessel from which people fish with pole and line.
+-   `trollers`: vessel that tows multiple fishing lines.
+-   `fixed_gear`: a category that includes potential set longlines, set
+    gillnets, and pots and traps
 
 ## Vessel Gear {.tabset .tabset-fade .tabset-pills}
 
-
 ## Exploratory Data Analysis
 
-```{r vessels eda, tidy = TRUE}
+```{r vessels eda, tidy = TRUE,fig.height=10, fig.width=20, tidy= TRUE}
 #To get a first impression of the data we take a look at the top 4 rows:
 # install.packages("gt")
 library(gt)
