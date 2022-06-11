@@ -3,10 +3,8 @@ title: "Vessel Activity-Global Fishing Watch"
 author: "Narjes Mathlouthi"
 date: '2022-04-10'
 output: 
-      rmdformats::material:
-      code_folding: hide
-      toc: true
-      toc_float: true
+  rmdformats::material:
+    code_folding: hide
 ---
 
 
@@ -181,6 +179,9 @@ Some classes of the outcome variable chosen for this analysis are described belo
    
 
 
+## Vessel Gear {.tabset .tabset-fade .tabset-pills}
+
+
 ## Exploratory Data Analysis
 
 ```{r vessels eda, tidy = TRUE}
@@ -219,18 +220,6 @@ vessels %>%
 panel.grid = element_blank(), legend.key = NULL)+
   coord_flip()  
 
-# #vis_miss(nsample(vessels, 400), sort_miss = TRUE)
-# is.na(vessels) %>% colSums()
-# vis_dat(vessels)
-# 
-# 
-# 
-# # Filter for outcome class
-# # vessels_df <- vessel_clean  %>% 
-# # filter(vessel_class_gfw %in% c("set_longlines", "set_gillnets", "set_longlines", "tuna_purse_seines", "fixed_gear", "pole_and_line"))
-# 
-# skim(vessels)
-# skim(vessels, where(is.numeric))
 ``` 
 
 * There are sixteen levels of the outcome, or primary classes of geartype, in the data. The classes with the smallest numbers of geartype are seiners,trollers, pure seine and other seines.
