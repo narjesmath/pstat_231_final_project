@@ -26,13 +26,16 @@ From the 16 available classes of geartype I choose the following predicting vari
 
 ## Models used 
 
+<img src="images/3d.png" width="300">
+
+
 1. PCA
-2. Lasso and Elastic-Net Regularized Generalized Linear 
-3. Decision Tree
-4. Random Forest
-5. Boosted Tree
-6. KNN
-7. Neural Network
+3. Lasso and Elastic-Net Regularized Generalized Linear 
+4. Decision Tree
+5. Random Forest
+6. Boosted Tree
+7. KNN
+8. Neural Network
 
 
 ## Folders
