@@ -910,7 +910,8 @@ nnet_res <-
 
 ## Conclusion
 
-
+The best performing models out of those tested are elestic tuning and neural network.
+The model would do much better if coupled with the geographic data for longitude and latitude for better estimates of vessels geartype used. This type of modeling can help in the future with marine conservation and help improve traditional fishing methods for more sustainable ones. 
 
 
 
