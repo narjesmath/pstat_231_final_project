@@ -30,15 +30,15 @@ Effort.](images/GFW-fishingmap-6_10_2022,%2010_52_12%20PM.png){width="500"}
 *Data are available in two formats:*
 
 1)  Fishing effort by flag state and gear type at 100th degree
-    resolution
-2)  Fishing effort by MMSI at 10th degree resolution
+    resolution (i.e. too large to upload)
+2)  Fishing effort by MMSI at 10th degree resolution (i.e. too large to upload)
 
 Each version of the fishing effort dataset is accompanied by a table of
-vessel information (e.g. gear type, flag state, dimensions, etc.).
+vessel information (e.g. gear type, flag state, dimensions, etc. listed in the metadata folder).
 
-Note: When attempting to download multiple files, you will receive an
+*Note: When attempting to download multiple files, you will receive an
 email containing download links after the data has been packaged. For
-large requests, it may take up to 24 hours to receive this email.
+large requests, it may take up to 24 hours to receive this email.*
 
 *Versions*
 
@@ -49,34 +49,34 @@ version uses a different set of inputs.
 
 *Current version*
 
-2.0: Fishing effort data for 2012-2020 using our latest AIS algorithms,
-neural network models, and vessel registry database.
+2.0: Fishing effort data for 2012-2020 using the latest AIS algorithms,
+*neural network models*, and *vessel registry database*.
 
 ## AIS Data
 
 This MMSI number is usually unique to a single vessel and typically
-doesn't change unless the vessel is reflagged. Most of the naval vessels
-we investigated did appear to use a particular MMSI number consistently
-even if the vessel only broadcast AIS occasionally. The MMSI numbers
-used by different naval vessels are listed on sites like MarineTraffic
-or even Wikipedia. But how can we really be sure that an MMSI number
-corresponds to a particular naval vessel? Naval vessels are frequently
-photographed, and it's possible to get a sequence of port visits based
-on photos uploaded to sites like warshipcam.com. This documented series
-o f port visits can then be compared to the AIS track to confirm that an
-MMSI corresponds to a particular vessel.
+doesn't change unless the vessel is red flagged. Most of the naval vessels
+investigated by Global Fishing Watch (GFW) did appear to use a particular 
+<u>MMSI number consistently</u> even if the vessel only broadcast AIS occasionally. 
+The MMSI numbers used by different naval vessels are listed on sites like 
+Marine Traffic or even Wikipedia. But how can we really be sure that an 
+MMSI number corresponds to a particular naval vessel? Naval vessels are 
+frequently photographed, and it's possible to get a sequence of port visits based
+on photos uploaded to sites like *warshipcam.com*. *This documented series
+of port visits can then be compared to the AIS track to confirm that an
+MMSI corresponds to a particular vessel.*(Clavelle,Tyler Global Fishing Watch)
 
 ## Data Wrangling & Exploration
 
 In a snapshot, some of the steps for data exploration in this analysis
 include :
 
--   Import data
--   Clean data
+-   Import data (i.e. Data imported here was downloaded from GFW website/ Although in a separate R scripts in        `model_results` folder I used `BigQuery`). The dataset used below is `fishing-vessels-v2.csv` saved as             `vessels.Rda`
+-   Clean data (I mainly worked with `vessels.Rda`. The other files were too large and exceeded `Github` 2 GB         limit.)
 -   Format data properly
 -   Create new variables
--   Get an overview about the complete data
--   Split data into training and test set using stratified sampling
+-   Get an overview about the complete data (i.e. especially missing data)
+-   Split data into training and test set using stratified sampling (i.e. strata is geartype here)
 -   Discover and visualize the data to gain insights
 
 ```{r setup, message=FALSE, warning=FALSE}
@@ -820,7 +820,7 @@ arrange(desc((mean)))
 best_complexity_boost <- select_best(boost_tune_res)
 ```
 
-The `roc_auc` of your best-performing boosted tree model on the folds 0.81
+The `roc_auc` of the best-performing boosted tree model on the folds
 
 #### Decion Tree, Random Forest, & Boosting model predictions
 
