@@ -167,27 +167,26 @@ two formats:
 -   Daily Fishing Effort and at **10th** Degree Resolution by MMSI,
     2012-2020
 
-Upon downloading each dataset, users will receive a `.zip` file
-containing a folder named fishing_effort (or fishing_effort_byvessel)
-that itself contains the data readme.txt file and the daily_csvs folder.
-The daily csvs are named according to the *YYYY-MM-DD.csv* format. The
-files generally increase in size over time due to the higher number of
-satellites receiving AIS data. Since we will be using both datasets,
-let's rename the fishing_effort folder to fishing_effort_byflag and then
-store both the fishing_effort_byflag and fishing_effort_byvessel folders
-within a directory called fishing_effort.
-
-Data containing details on the fishing vessels included in the fishing
-effort datasets are also available. These data can be used in
-conjunction with the "Daily Fishing Effort and at 10th Degree Resolution
+Upon downloading each dataset, users will receive a `.zip` file.
+When using GFW website you could select how many files you want to download.
+Some of the files downloaded for this analysis include data readme.txt files 
+(i.e metadata folder), daily_csvs folder (i.e MMSI, fleet) and 
+daily fishing effort and vessel presence`fishing-vessels-v2.csv` saved as             
+`vessels.Rda`.This data can be used in conjunction with the 
+"Daily Fishing Effort and at 10th Degree Resolution
 by MMSI" data to explore vessel and fleet characteristics and provide
 details (gear type, flag state, etc.) for the MMSI being analyzed.
+
+The daily csvs are named according to the *YYYY-MM-DD.csv* format. The
+files generally increase in size over time due to the higher number of
+satellites receiving AIS data. 
+
 
 #### Shapefiles
 
 Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are
-useful for providing context to maps of fishing effort. For this
-analysis, we'll use a land shapefile from the maps R package and an
+useful for providing context to maps of fishing effort(too large to upload). 
+For this analysis, we'll use a land shapefile from the maps R package and an
 **EEZ shapefile** from **MarineRegions.org**. We'll also load/convert
 both of these **shapefiles** to sf objects. The `sf` R package is a
 great package for working with vector data stored in dataframes,
