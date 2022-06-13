@@ -1,13 +1,8 @@
-
-
-
 # ⛴ Classification of Vessel Geartype
 
 Machine learning class final project
 
 ![Fig 1. Map of Apparent Fishing Effort “Copyright \[2022\], Global Fishing Watch, Inc.www.globalfishingwatch.org.”](<images/GFW-fishingmap-6\_10\_2022, 10\_52\_12 PM.png>)
-
-
 
 ## <mark style="color:blue;">Table of Contents</mark>
 
@@ -22,13 +17,11 @@ This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/
 
 Using Global Fishing Watch fishing effort vessel data, I use several machine learning classification models to predict geartype of fishing vessels. From the 16 available classes of geartype my outcome variable will be based on these five classes:
 
-<mark style="background-color:blue;">`"set_longlines"`</mark>, `"set_gillnets"`, <mark style="background-color:blue;">`"tuna_purse_seines"`</mark>`,` <mark style="background-color:blue;">`"fishing"`</mark>`,` <mark style="background-color:blue;">`"other_purse_seines"`</mark>`,`<mark style="background-color:blue;">`" drifting_longlines"`</mark>
+<mark style="background-color:blue;">`"set_longlines"`</mark>, <mark style="background-color:blue;">`"set_gillnets"`</mark>, <mark style="background-color:blue;">`"tuna_purse_seines"`</mark>`,` <mark style="background-color:blue;">`"fishing"`</mark>`,` <mark style="background-color:blue;">`"other_purse_seines"`</mark>`,`<mark style="background-color:blue;">`" drifting_longlines"`</mark>
 
 ## <mark style="color:blue;">Models used</mark>
 
 ![Fig2. Visual representation of three principal components from the vessel data](images/3d.png)
-
-
 
 1. PCA
 2. Lasso and Elastic-Net Regularized Generalized Linear
