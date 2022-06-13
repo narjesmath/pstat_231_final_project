@@ -1,12 +1,19 @@
-# Classification of Vessel Geartype
+---
+cover: >-
+  https://images.unsplash.com/photo-1559825481-12a05cc00344?crop=entropy&cs=tinysrgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHw0fHxvY2VhbnxlbnwwfHx8fDE2NTUxMDcyNDU&ixlib=rb-1.2.1&q=80
+coverY: 0
+layout: landing
+---
+
+# ⛴ Classification of Vessel Geartype
 
 Machine learning class final project
 
-![](<images/GFW-fishingmap-6\_10\_2022, 10\_52\_12 PM.png>)
+![Fig 1. Map of Apparent Fishing Effort “Copyright \[2022\], Global Fishing Watch, Inc.www.globalfishingwatch.org.”](<images/GFW-fishingmap-6\_10\_2022, 10\_52\_12 PM.png>)
 
-Fig 1.Map of Apparent Fishing Effort _“Copyright \[2022], Global Fishing Watch, Inc., www.globalfishingwatch.org.”_
 
-## Table of Contents
+
+## <mark style="color:blue;">Table of Contents</mark>
 
 1. [Overview](./#Overview)
 2. [Models used](./#Modelsused)
@@ -15,7 +22,7 @@ Fig 1.Map of Apparent Fishing Effort _“Copyright \[2022], Global Fishing Watch
 
 ## <mark style="color:blue;">Overview</mark>
 
-This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets. Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which \~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
+This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets. Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which \~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position) and then summing all positions in each grid cell.
 
 Using Global Fishing Watch fishing effort vessel data, I use several machine learning classification models to predict geartype of fishing vessels. From the 16 available classes of geartype my outcome variable will be based on these five classes:
 
@@ -23,9 +30,9 @@ Using Global Fishing Watch fishing effort vessel data, I use several machine lea
 
 ## <mark style="color:blue;">Models used</mark>
 
-![](images/3d.png)
+![Fig2. Visual representation of three principal components from the vessel data](images/3d.png)
 
-Fig2. Visual representation of three principal components from the vessel data
+
 
 1. PCA
 2. Lasso and Elastic-Net Regularized Generalized Linear
