@@ -31,10 +31,12 @@ Effort.](images/GFW-fishingmap-6_10_2022,%2010_52_12%20PM.png){width="500"}
 
 1)  Fishing effort by flag state and gear type at 100th degree
     resolution (i.e. too large to upload)
-2)  Fishing effort by MMSI at 10th degree resolution (i.e. too large to upload)
+2)  Fishing effort by MMSI at 10th degree resolution (i.e. too large to
+    upload)
 
 Each version of the fishing effort dataset is accompanied by a table of
-vessel information (e.g. gear type, flag state, dimensions, etc. listed in the metadata folder).
+vessel information (e.g. gear type, flag state, dimensions, etc. listed
+in the metadata folder).
 
 *Note: When attempting to download multiple files, you will receive an
 email containing download links after the data has been packaged. For
@@ -55,28 +57,36 @@ version uses a different set of inputs.
 ## AIS Data
 
 This MMSI number is usually unique to a single vessel and typically
-doesn't change unless the vessel is red flagged. Most of the naval vessels
-investigated by Global Fishing Watch (GFW) did appear to use a particular 
-<u>MMSI number consistently</u> even if the vessel only broadcast AIS occasionally. 
-The MMSI numbers used by different naval vessels are listed on sites like 
-Marine Traffic or even Wikipedia. But how can we really be sure that an 
-MMSI number corresponds to a particular naval vessel? Naval vessels are 
-frequently photographed, and it's possible to get a sequence of port visits based
-on photos uploaded to sites like *warshipcam.com*. *This documented series
-of port visits can then be compared to the AIS track to confirm that an
-MMSI corresponds to a particular vessel.*(Clavelle,Tyler Global Fishing Watch)
+doesn't change unless the vessel is red flagged. Most of the naval
+vessels investigated by Global Fishing Watch (GFW) did appear to use a
+particular <u>MMSI number consistently</u> even if the vessel only
+broadcast AIS occasionally. The MMSI numbers used by different naval
+vessels are listed on sites like Marine Traffic or even Wikipedia. But
+how can we really be sure that an MMSI number corresponds to a
+particular naval vessel? Naval vessels are frequently photographed, and
+it's possible to get a sequence of port visits based on photos uploaded
+to sites like *warshipcam.com*. *This documented series of port visits
+can then be compared to the AIS track to confirm that an MMSI
+corresponds to a particular vessel.*(Clavelle,Tyler Global Fishing
+Watch)
 
 ## Data Wrangling & Exploration
 
 In a snapshot, some of the steps for data exploration in this analysis
 include :
 
--   Import data (i.e. Data imported here was downloaded from GFW website/ Although in a separate R scripts in        `model_results` folder I used `BigQuery`). The dataset used below is `fishing-vessels-v2.csv` saved as             `vessels.Rda`
--   Clean data (I mainly worked with `vessels.Rda`. The other files were too large and exceeded `Github` 2 GB         limit.)
+-   Import data (i.e. Data imported here was downloaded from GFW
+    website/ Although in a separate R scripts in `model_results` folder
+    I used `BigQuery`). The dataset used below is
+    `fishing-vessels-v2.csv` saved as `vessels.Rda`
+-   Clean data (I mainly worked with `vessels.Rda`. The other files were
+    too large and exceeded `Github` 2 GB limit.)
 -   Format data properly
 -   Create new variables
--   Get an overview about the complete data (i.e. especially missing data)
--   Split data into training and test set using stratified sampling (i.e. strata is geartype here)
+-   Get an overview about the complete data (i.e. especially missing
+    data)
+-   Split data into training and test set using stratified sampling
+    (i.e. strata is geartype here)
 -   Discover and visualize the data to gain insights
 
 ```{r setup, message=FALSE, warning=FALSE}
@@ -91,16 +101,10 @@ tidyr, readr) and plotting (ggplot2), `lubridate()` is great for working
 with dates. The `tidymodels()` package is key to this analysis for
 setting up all the models for machine learning.
 
-Some of the Models used include : 
+Some of the Models used include :
 
-PCA
-Lasso and Elastic-Net Regularized Generalized Linear
-Decision Tree
-Random Forest
-Boosted Tree
-KNN
-Neural Network
-
+PCA Lasso and Elastic-Net Regularized Generalized Linear Decision Tree
+Random Forest Boosted Tree KNN Neural Network
 
 ## Loading packages
 
@@ -167,30 +171,31 @@ two formats:
 -   Daily Fishing Effort and at **10th** Degree Resolution by MMSI,
     2012-2020
 
-Upon downloading each dataset, users will receive a `.zip` file.
-When using GFW website you could select how many files you want to download.
-Some of the files downloaded for this analysis include data readme.txt files 
-(i.e metadata folder), daily_csvs folder (i.e MMSI, fleet) and 
-daily fishing effort and vessel presence`fishing-vessels-v2.csv` saved as             
-`vessels.Rda`.This data can be used in conjunction with the 
-"Daily Fishing Effort and at 10th Degree Resolution
-by MMSI" data to explore vessel and fleet characteristics and provide
-details (gear type, flag state, etc.) for the MMSI being analyzed.
+Upon downloading each dataset, users will receive a `.zip` file. When
+using GFW website you could select how many files you want to download.
+Some of the files downloaded for this analysis include data readme.txt
+files (i.e metadata folder), daily_csvs folder (i.e MMSI, fleet) and
+daily fishing effort and vessel presence`fishing-vessels-v2.csv` saved
+as\
+`vessels.Rda`.This data can be used in conjunction with the "Daily
+Fishing Effort and at 10th Degree Resolution by MMSI" data to explore
+vessel and fleet characteristics and provide details (gear type, flag
+state, etc.) for the MMSI being analyzed.
 
 The daily csvs are named according to the *YYYY-MM-DD.csv* format. The
 files generally increase in size over time due to the higher number of
-satellites receiving AIS data. 
-
+satellites receiving AIS data.
 
 #### Shapefiles
 
 Shapefiles of land and Exclusive Economic Zone (EEZ) boundaries are
-useful for providing context to maps of fishing effort(too large to upload). 
-For this analysis, we'll use a land shapefile from the maps R package and an
-**EEZ shapefile** from **MarineRegions.org**. We'll also load/convert
-both of these **shapefiles** to sf objects. The `sf` R package is a
-great package for working with vector data stored in dataframes,
-providing numerous functions for performing spatial operations.
+useful for providing context to maps of fishing effort(too large to
+upload). For this analysis, we'll use a land shapefile from the maps R
+package and an **EEZ shapefile** from **MarineRegions.org**. We'll also
+load/convert both of these **shapefiles** to sf objects. The `sf` R
+package is a great package for working with vector data stored in
+dataframes, providing numerous functions for performing spatial
+operations.
 
 #### World polygons from the maps package
 
@@ -352,8 +357,7 @@ Principal components analysis is an ordination method allowing us to
 glean as much about our multivariate data as possible in a simplified
 number of dimensions. Here, we'll use our dataset of fishing vessels to
 explore variable relationships and clustering by geartype in a PCA
-biplot. For this example with PCA, we will only use *the structure size
-measurements (bill length and depth, mass, and flipper length)*.
+biplot. For this example with PCA, we will only use numeric predictors (i.e.mmsi,vessel_class_inferred_score,length_m_inferred,engine_power_kw)*.
 
 We use the R built-in function `prcomp()` to calculate the principal
 components of the dataset. It's important to specify `scale = TRUE` so
@@ -424,8 +428,8 @@ pca2_3d <- pca3d(
 
 ```
 
-
-The PCA analysis indicates that PC1 & PC2 represents a good amount of the data compare to the rest.
+The PCA analysis indicates that PC1 & PC2 represents a good amount of
+the data compare to the rest.
 
 ![PCA (CPC1, PC2, PC3)](images/3dpca.png){width="400"}
 
@@ -445,7 +449,8 @@ vessels_test <- testing(vessels_split)
 # dim(vessels_train)
 ```
 
-In order to have a good training set, we set up prop equal to 80% and our training set has 29 variables with 7998 obs.
+In order to have a good training set, we set up prop equal to 80% and
+our training set has 29 variables with 7998 obs.
 
 #### Training set Visualisation
 
@@ -460,7 +465,9 @@ vessels_train %>%
   corrplot(type = "lower", diag = FALSE)
 ```
 
-From the corrplot, we can see that tonnage_gt_ registery and engine_power_kw_gfw are positively correlated but length_mregitery is negatively correlated with engine power.
+From the corrplot, we can see that tonnage_gt\_ registery and
+engine_power_kw_gfw are positively correlated but length_mregitery is
+negatively correlated with engine power.
 
 b.  Barplot
 
@@ -470,25 +477,31 @@ vessels_train %>%
   geom_bar(aes(fill=vessel_class_gfw))
 ```
 
-From the barplot of the chosen predictors : "set_longlines", "set_gillnets", "tuna_purse_seines",	"fishing",			
-"other_purse_seines","	drifting_longlines". We notice that `fishng` class has more observations than the others.
-
+From the barplot of the chosen predictors : "set_longlines",
+"set_gillnets", "tuna_purse_seines", "fishing",\
+"other_purse_seines"," drifting_longlines". We notice that `fishng`
+class has more observations than the others.
 
 #### Cross Validation folds
 
-For the cross-validation, I'm using v = 3 folds and stratifying the outcome variable for geartype `vessel_class_gfw`.
+For the cross-validation, I'm using v = 3 folds and stratifying the
+outcome variable for geartype `vessel_class_gfw`.
 
 ```{r vfolds, tidy = TRUE}
 set.seed(3435)
 vessels_folds <- vfold_cv(data = vessels_train, v = 3, strata = vessel_class_gfw)
 ```
 
-Using a subset of the data and given that the training set only has 29 vars and many observations. we chose to use a lower **v-folds** to avoid having an imbalance in a given class where an outcome variable may either be present or not.
+Using a subset of the data and given that the training set only has 29
+vars and many observations. we chose to use a lower **v-folds** to avoid
+having an imbalance in a given class where an outcome variable may
+either be present or not.
 
 ## Vessel recipe
 
-In this section, we chose our model recipe : predictors  for the outcome variable. 
-Note that I used `na.replace(0)` for the fishing hours yearly variables due to to the large numbers of missing data.
+In this section, we chose our model recipe : predictors for the outcome
+variable. Note that I used `na.replace(0)` for the fishing hours yearly
+variables due to to the large numbers of missing data.
 
 ```{r recipe, tidy = TRUE}
 
@@ -550,7 +563,6 @@ ggplot2::autoplot(tune_res_1)
 toc()
 ```
 
-
 We're fitting a grid of 100 combinations of values for the
 hyperparameters penalty and mixture, or 100 models, and we're fitting
 each of these once per fold, for a total of 200 models.
@@ -565,11 +577,11 @@ tune_res_1 <- tune_grid(
 autoplot(tune_res_1)
 ```
 
-Smaller values of penalty, or “amount of regularization,” and smaller values of mixture, or “proportion of lasso penalty,” tend to result in higher ROC-AUC and accuracy values. 
-
+Smaller values of penalty, or "amount of regularization," and smaller
+values of mixture, or "proportion of lasso penalty," tend to result in
+higher ROC-AUC and accuracy values.
 
 #### Model Prediction, fitting & Visualization
-
 
 ```{r en best}
 best_model <- select_best(tune_res_1, metric = "roc_auc")
@@ -590,17 +602,14 @@ predicted_data %>%
 In the heat map, the correct classifications are always on the diagonal
 and misclassifications on the off-diagonals. The model correctly
 identified fishing geartype, for example. From the heat map, we can see
-that the model doesn't seem to be able to distinguish other_purse_seines well at
-all; it misclassifies other geartypes as fishing frequently.
-
-
+that the model doesn't seem to be able to distinguish other_purse_seines
+well at all; it misclassifies other geartypes as fishing frequently.
 
 ```{r en pred data}
 predicted_data %>% roc_auc(vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)
 ```
 
-roc_auc  in this model is around 72%.
-
+roc_auc in this model is around 72%.
 
 ### Decision Trees
 
@@ -671,7 +680,6 @@ arrange(desc((mean)))
 
 best_complexity <- select_best(tune_res_tr )
 ```
-
 
 #### Decision Tree Visualization
 
@@ -835,9 +843,7 @@ joined_models
 
 The best model is the random forest model, with an AUC ROC of 0.628.
 
-#### Best-performing model on the testing set 
-
-
+#### Best-performing model on the testing set
 
 ```{r}
 rf_test_fit = augment(rf_fit, new_data = vessels_test) 
@@ -845,7 +851,6 @@ roc_auc(rf_test_fit, truth = vessel_class_gfw, .pred_fishing:.pred_tuna_purse_se
 ```
 
 AUC value of the best-performing model on the testing set.
-
 
 ```{r}
 autoplot(roc_curve(rf_test_fit, truth = vessel_class_gfw, .pred_fishing:.pred_tuna_purse_seines)) 
@@ -891,7 +896,6 @@ knn_res %>% collect_metrics(summarize = TRUE)
 
 ```
 
-
 The `roc_auc` of the best-performing knn here is 0.40
 
 #### Neural network
@@ -928,11 +932,12 @@ The `roc_auc` of the best-performing knn here is 0.40
 
 ## Conclusion
 
-The best performing models out of those tested are elestic tuning and neural network.
-The model would do much better if coupled with the geographic data for longitude and latitude for better estimates of vessels geartype used. This type of modeling can help in the future with marine conservation and help improve traditional fishing methods for more sustainable ones. 
-
-
-
+The best performing models out of those tested are elestic tuning and
+neural network. The model would do much better if coupled with the
+geographic data for longitude and latitude for better estimates of
+vessels geartype used. This type of modeling can help in the future with
+marine conservation and help improve traditional fishing methods for
+more sustainable ones.
 
 ## References
 
