@@ -1,8 +1,4 @@
----
-cover: >-
-  https://images.unsplash.com/photo-1524657733441-fb21843c3f90?crop=entropy&cs=tinysrgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHw0fHxmaXNoaW5nJTIwdmVzc2VsfGVufDB8fHx8MTY1NTExMDc3MQ&ixlib=rb-1.2.1&q=80
-coverY: 0
----
+
 
 # ⛴ Classification of Vessel Geartype
 
