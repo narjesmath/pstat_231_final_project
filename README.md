@@ -13,19 +13,19 @@ Fig 1.Map of Apparent Fishing Effort _“Copyright \[2022], Global Fishing Watch
 3. [Folders](./#Folders)
 4. [References](./#References)
 
-## Overview
+## <mark style="color:blue;">Overview</mark>
 
-This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets .Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which \~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
+This dataset contains the [Global Fishing Watch](https://globalfishingwatch.org/datasets-and-code/) AIS-based fishing effort and vessel presence datasets. Data is based on fishing detections of >114,000 unique AIS devices on fishing vessels, of which \~70,000 are active each year. Fishing vessels are identified via a neural network classifier, vessel registry databases, and manual review by GFW and regional experts. Data are binned into grid cells 0.01 (or 0.1) degrees on a side and measured in units of hours. The time is calculated by assigning an amount of time to each AIS detection (which is the time to the previous position), and then summing all positions in each grid cell.
 
 Using Global Fishing Watch fishing effort vessel data, I use several machine learning classification models to predict geartype of fishing vessels. From the 16 available classes of geartype my outcome variable will be based on these five classes:
 
-"set\_longlines", "set\_gillnets", "tuna\_purse\_seines", "fishing", "other\_purse\_seines"," drifting\_longlines"
+<mark style="background-color:blue;">`"set_longlines"`</mark>, `"set_gillnets"`, <mark style="background-color:blue;">`"tuna_purse_seines"`</mark>`,` <mark style="background-color:blue;">`"fishing"`</mark>`,` <mark style="background-color:blue;">`"other_purse_seines"`</mark>`,`<mark style="background-color:blue;">`" drifting_longlines"`</mark>
 
-## Models used
+## <mark style="color:blue;">Models used</mark>
 
 ![](images/3d.png)
 
-Fig2.Visual representation of three principal components from the vessel data
+Fig2. Visual representation of three principal components from the vessel data
 
 1. PCA
 2. Lasso and Elastic-Net Regularized Generalized Linear
@@ -35,14 +35,14 @@ Fig2.Visual representation of three principal components from the vessel data
 6. KNN
 7. Neural Network
 
-## Folders
+## <mark style="color:blue;">Folders</mark>
 
-1. data
+1. Data
 2. images
 3. metadata (i.e. contains codebook)
 4. model\_results
 
-## References
+## <mark style="color:blue;">References</mark>
 
 “Copyright \[2022], Global Fishing Watch, Inc., www.globalfishingwatch.org.”
 
