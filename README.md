@@ -1,9 +1,5 @@
----
-cover: >-
-  https://images.unsplash.com/photo-1559825481-12a05cc00344?crop=entropy&cs=tinysrgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHw0fHxvY2VhbnxlbnwwfHx8fDE2NTUxMDcyNDU&ixlib=rb-1.2.1&q=80
-coverY: 0
-layout: landing
----
+![](https://github.com/narjesmath/pstat_231_final_project/https://images.unsplash.com/photo-1559825481-12a05cc00344?crop=entropy&cs=tinysrgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHw0fHxvY2VhbnxlbnwwfHx8fDE2NTUxMDcyNDU&ixlib=rb-1.2.1&q=80)
+
 
 # ⛴ Classification of Vessel Geartype
 
